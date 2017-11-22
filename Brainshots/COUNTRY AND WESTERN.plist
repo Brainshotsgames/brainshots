@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   CountryWestern.plist
+   Brainshots
+
+   Created by Amritpal Singh on 29/03/17.
+   Copyright (c) 2017 Anuradha Sharma. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>WordPack</key>
+        <array>
+            <string>cowboy</string>
+            <string>horse</string>
+            <string>ride</string>
+            <string>wanted</string>
+            <string>dead</string>
+            <string>alive</string>
+            <string>highway</string>
+            <string>truck</string>
+            <string>road</string>
+            <string>dirt</string>
+            <string>boots</string>
+            <string>guitar</string>
+            <string>beer</string>
+            <string>hat</string>
+            <string>Jesus</string>
+            <string>jeans</string>
+            <string>wheel</string>
+            <string>gun</string>
+            <string>cheat</string>
+            <string>lie</string>
+            <string>steal</string>
+            <string>snake</string>
+            <string>country</string>
+            <string>forget</string>
+            <string>home</string>
+            <string>America</string>
+            <string>can’t</string>
+            <string>prayer</string>
+            <string>ain’t</string>
+            <string>forever</string>
+            <string>free</string>
+            <string>town</string>
+            <string>good</string>
+            <string>live</string>
+            <string>devil</string>
+            <string>mama</string>
+            <string>papa</string>
+            <string>lonely</string>
+            <string>bottle</string>
+            <string>Sunday</string>
+            <string>church</string>
+            <string>lord</string>
+            <string>whiskey</string>
+            <string>brother</string>
+            <string>fight</string>
+            <string>hard</string>
+            <string>job</string>
+            <string>car</string>
+            <string>cruise</string>
+            <string>Texas</string>
+            <string>darling</string>
+            <string>cry</string>
+            <string>drive</string>
+            <string>radio</string>
+            <string>slow</string>
+            <string>swing</string>
+            <string>man</string>
+            <string>alive</string>
+            <string>Southern</string>
+            <string>song</string>
+            <string>old</string>
+            <string>morning</string>
+            <string>mind</string>
+            <string>tomorrow</string>
+            <string>round</string>
+        </array>
+        <key>LightningRound</key>
+        <array>
+            <string>Sing as many songs as you can with the words “night” or “day”</string>
+            <string>Sing as many songs as you can with the words “red” or “blue”</string>
+            <string>Sing as many songs that mention any type of clothing</string>
+            <string>Sing as many songs about parts of the face</string>
+            <string>Sing as many songs as you can with the words “top” or “bottom”</string>
+            <string>Sing as many songs whose titles start with letter “R”</string>
+            <string>Sing as many songs about different dances/dance moves</string>
+            <string>Sing as many songs as you can with the word car or different cars</string>
+            <string>Sing as many songs as you can that mention types of alcohol</string>
+            <string>Sing as many songs whose titles start with letter “A”</string>
+            <string>Sing as many songs that mention animals</string>
+            <string>Sing as many songs that have the name of a city or country</string>
+            <string>Sing as many country songs as you can</string>
+            <string>Sing as many songs whose titles start with letter “E”</string>
+            <string>Sing as many songs as you can about breaking up</string>
+        </array>
+    </dict>
+</plist>

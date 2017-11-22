@@ -1,0 +1,218 @@
+//
+//  IndividualSession.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 06/03/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+protocol IPSessionDelegate {
+    
+    func receiveMessage(message:String,from peerid:MCPeerID)
+}
+
+class IndividualSession: NSObject,MCNearbyServiceAdvertiserDelegate,MCSessionDelegate {
+    
+    var session : MCSession? = nil
+    var advertiserAssistant : MCNearbyServiceAdvertiser? = nil
+    var delegate : IPSessionDelegate?
+    
+    convenience init(displayName:String,serviceType:String,ifAdvertise:Bool) {
+        
+        self.init()
+        let peerID = MCPeerID.init(displayName: displayName)
+        session = MCSession.init(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
+        session?.delegate = self
+        
+        if(ifAdvertise){
+            self.ifAdvertise(peerID: peerID, serviceType:serviceType)
+        }
+    }
+    
+    /*Check for advertisement*/
+    func ifAdvertise(peerID:MCPeerID,serviceType:String) {
+        
+        advertiserAssistant = MCNearbyServiceAdvertiser.init(peer: peerID, discoveryInfo: nil, serviceType: serviceType)
+        advertiserAssistant?.delegate = self
+        advertiserAssistant?.startAdvertisingPeer()
+    }
+    
+    //MARK:- Send Message Methods
+    /*Send message to all connected peers*/
+    func sendMessage(message:String){
+    
+        let messageData : Data =  message.data(using: .utf8)!
+        do {
+            try session?.send(messageData, toPeers: (session?.connectedPeers)!, with: .reliable)
+        }
+        catch { print(error) }
+    }
+    
+    /*send message to particular peer*/
+    func sendMessage(message:String,peerID:MCPeerID){
+    
+        let peer  = [peerID]
+        let messageData : Data =  message.data(using: .utf8)!
+        
+        do {
+            try session?.send(messageData, toPeers: peer, with: .reliable)
+        }
+        catch { print(error) }
+    }
+    
+    /*send message to particular peers*/
+    func sendMessage(message:String,peerIDs:[MCPeerID]){
+    
+        do {
+            let messageData =  message.data(using: .utf8)
+            try session?.send(messageData!, toPeers:peerIDs, with: .reliable)
+        }
+        catch{ print(error) }
+    }
+    
+    //MARK:- Advertiser Delegate
+    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool,
+        MCSession?) -> Swift.Void) {
+    
+        invitationHandler(true,session)
+    }
+    
+    //MARK:- Session Delegates
+    //MARK: State Change
+    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState){
+    
+        if(state == MCSessionState.connected) {
+        
+            print("Device \(peerID.displayName) changed state to connected")
+            
+            if(UserDefaults.standard.bool(forKey: "isHost")){
+                if(UserDefaults.standard.bool(forKey: "duplicatePeerCheck")) {
+                    checkDuplicatePeerName(peerid:peerID)
+                }
+            }
+
+            self.sendingConnectionMessage(state:state, peerID: peerID)
+        }
+            
+        else if(state == MCSessionState.connecting){
+            
+            print("Device \(peerID.displayName) changed state to connecting")
+        }
+            
+        else if (state == MCSessionState.notConnected){
+            
+            print("Device \(peerID.displayName) changed state to not connected")
+            
+            if(UserDefaults.standard.bool(forKey: "GameStarts")) {
+               checkLostConnections(peerID:peerID)
+            }
+            else{
+                self.sendingConnectionMessage(state:state, peerID: peerID)
+            }
+        }
+    }
+    
+    /*Duplicacy Check*/
+    func checkDuplicatePeerName(peerid:MCPeerID){
+    
+        var tempArray : [MCPeerID] = (appDelegate.IPSession.session?.connectedPeers)!
+        tempArray.append((appDelegate.IPSession.session?.myPeerID)!)
+        print("all Connected Players --> \(tempArray)")
+        
+        let index = tempArray.index(of:peerid)
+        tempArray.remove(at: index!)
+        
+        print("Connected Players Left --> \(tempArray)")
+        
+        let connectedArray : [MCPeerID] = tempArray
+        var connectedPeersName = [String]()
+        
+        if(connectedArray.count > 0){
+            
+            for i in 0...connectedArray.count-1 {
+                
+                let peer : MCPeerID = connectedArray[i]
+                let displayName = peer.displayName
+                connectedPeersName.append(displayName)
+            }
+        }
+        
+        print("Connected Players Name --> \(connectedPeersName)")
+        
+        let jsonObject = ["message":"getPeersInfo","peersNameList":connectedPeersName] as [String : Any]
+        let str = getJsonString(dict: jsonObject)
+        
+        print("JSON --> \(str) \n Peer ID \(peerid)")
+        
+        appDelegate.IPSession.sendMessage(message:str , peerID: peerid)
+
+    }
+    
+    /*Check Connection Lost*/
+    func checkLostConnections(peerID:MCPeerID) {
+    
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+            
+            if(!(appDelegate.IPSession.session?.connectedPeers.count == 0)){
+                
+                CommonFunctions.sharedInstance.removePlayers(peer: peerID)
+                CommonFunctions.sharedInstance.removeRandomPlayer(peer: peerID)
+                CommonFunctions.sharedInstance.removePlayer(peer: peerID)
+                CommonFunctions.sharedInstance.removePlayersScoreStats(peer: peerID)
+                
+                var dict = [String:Any]()
+                dict = ["message":"connectionLost","peer":peerID,"status":"not-connected"]
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "lightningRoundConnectionCheck"), object: nil, userInfo: dict)
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "connectionLostForPeer"), object: nil, userInfo: dict)
+                
+            }
+            else if(appDelegate.IPSession.session?.connectedPeers.count == 0){
+                
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "connectionLost"), object: nil)
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "invalidateTimerSound"), object: nil)
+                appDelegate.IPSession.session?.disconnect()
+            }
+        }
+        else {
+            
+            let peer : MCPeerID = CommonFunctions.sharedInstance.getHostID()
+            if(peerID == peer){
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "connectionLost"), object: nil)
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "invalidateTimerSound"), object: nil)
+                appDelegate.IPSession.session?.disconnect()
+            }
+        }
+    }
+    
+    /*Connecting Message Observer*/
+    func sendingConnectionMessage(state:MCSessionState,peerID:MCPeerID){
+        
+        var dict = [String:Any]()
+        
+        if(state == MCSessionState.connected){
+            
+            dict = ["peer":peerID,"status":"connected"]
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "connectingHost"), object: nil, userInfo: dict)
+        }
+        else if (state == MCSessionState.notConnected){
+            
+            dict = ["peer":peerID,"status":"not-connected"]
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "connectingHost"), object: nil, userInfo: dict)
+        }
+    }
+    
+    //MARK: Receives Data
+    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        
+        let receiveMessage : String = String.init(data: data, encoding: .utf8)!
+        delegate?.receiveMessage(message: receiveMessage, from:peerID)
+    }
+    
+    /*unused Delegates*/
+    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID){}
+    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress){}
+    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL, withError error: Error?){}
+}

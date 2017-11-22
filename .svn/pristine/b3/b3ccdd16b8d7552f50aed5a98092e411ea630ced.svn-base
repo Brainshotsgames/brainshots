@@ -1,0 +1,182 @@
+//
+//  DrinkerViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class DrinkerViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+    
+    @IBOutlet weak var lblTitle: UILabel!
+    @IBOutlet weak var tableView: UITableView!
+    var drinkArray = NSArray()
+    
+    var handSlapPlayer : AVAudioPlayer?
+    var bottleOnPlayer : AVAudioPlayer?
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        drinkArray = ["BEER","VODKA","TEQUILA","RED WINE","WHITE WINE","COOLERS","RUM","GIN","SCOTCH","OTHER"]
+        tableView.separatorColor = UIColor.clear
+        
+        handSlapSound()
+        bottleOnCounterSound()
+
+        // Do any additional setup after loading the view.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- UItableview Delegates
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return drinkArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "Cell"
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
+        let shotsName : String = "\(String(indexPath.row + 1)). \(String(describing: drinkArray.object(at: indexPath.row)))"
+        cell.textLabel?.text = shotsName
+        cell.textLabel?.font = UIFont.init(name: "FatFrank-Regular", size: 20);
+        cell.textLabel?.textColor = UIColor.white
+        
+        
+        let tapAction = UIButton()
+        tapAction.frame = CGRect(x: 0, y: 3, width: 125, height: 30)
+        cell.contentView.addSubview(tapAction)
+        tapAction.tag = indexPath.row
+        tapAction.addTarget(self, action: #selector(btnAction), for: .touchUpInside)
+        tapAction.addTarget(self, action: #selector(touchDown), for: .touchDown)
+        
+        cell.selectionStyle = UITableViewCellSelectionStyle.none
+        
+        return cell
+        
+    }
+    
+    /*Drink tap Action*/
+    func btnAction(_sender:UIButton){
+    
+        showAnimation(index:_sender.tag)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 50
+    }
+    
+    func showAnimation(index:NSInteger) {
+    
+        let showAnimationImgView = FLAnimatedImageView(frame: self.view.frame)
+        self.view.addSubview(showAnimationImgView)
+        self.view.isUserInteractionEnabled = false
+        
+        
+        var url = NSURL()
+        
+        if(DeviceType.IS_IPHONE_6P){
+            
+            url = Bundle.main.url(forResource: "Drinker_Heavy", withExtension: "gif")! as NSURL
+        }
+        else{
+            
+            url = Bundle.main.url(forResource: "Drinker_Heavy", withExtension: "gif")! as NSURL
+        }
+        
+        let data = NSData(contentsOf: url as URL)
+        let animatedImage = FLAnimatedImage(animatedGIFData: data as Data!)
+        animatedImage?.loopCount = 1
+        showAnimationImgView.animatedImage = animatedImage
+        
+        perform(#selector(handSlap), with: nil, afterDelay: 0.1)
+        perform(#selector(bottleOnCounter), with: nil, afterDelay: 0.2)
+        
+        /*Block to show Popup ( Your Drink is *** )*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            
+            let text = "\(self.drinkArray.object(at: index))"
+            let popUp = PopupView.init(frame: CGRect(x: 10, y: self.view.frame.size.height - 120, width: self.view.frame.size.width - 120, height: 100))
+            popUp.setLabel(text: "Your Shot is \n \(text.capitalized)")
+            popUp.setTransitionToController(target:self)
+            
+            /*Block to hide animation*/
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                
+                    showAnimationImgView.removeFromSuperview()
+                    popUp.removeFromSuperview()
+            }
+            self.view.isUserInteractionEnabled = true
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0){
+                
+                let controller = self.storyboard?.instantiateViewController(withIdentifier: "PartyStartedViewController") as! PartyStartedViewController
+                self.navigationController?.pushViewController(controller, animated: true)
+            }
+        }
+    }
+    
+    /*Play Handslap Sound*/
+    func handSlap(){
+    
+        handSlapPlayer?.prepareToPlay()
+        handSlapPlayer?.play()
+    }
+    
+    /*Play bottle on counter Sound*/
+    func bottleOnCounter(){
+        
+        bottleOnPlayer?.prepareToPlay()
+        bottleOnPlayer?.play()
+    }
+    
+    /*Add HandSlap Sound*/
+    func handSlapSound() {
+        
+        let url = Bundle.main.url(forResource: "HAND SLAPS COUNTER", withExtension: "wav")!
+        
+        do {
+            handSlapPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let handSlapPlayer = handSlapPlayer else { return }
+            handSlapPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Bottle On Counter Sound*/
+    func bottleOnCounterSound(){
+        
+        let url = Bundle.main.url(forResource: "BOTTLE ON COUNTER", withExtension: "wav")!
+        
+        do {
+            bottleOnPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let bottleOnPlayer = bottleOnPlayer else { return }
+            bottleOnPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+
+    
+    //MARK:- Back button action
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK:- TouchDown Actions Sound
+    @IBAction func touchDown(_ sender: AnyObject) {
+        CommonFunctions.sharedInstance.buttonPressedSound()
+    }
+}

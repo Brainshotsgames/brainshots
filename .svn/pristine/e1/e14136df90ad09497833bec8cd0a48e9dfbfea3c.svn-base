@@ -1,0 +1,168 @@
+//
+//  SoundViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+//import JPSVolumeButtonHandler
+
+class SoundViewController: UIViewController {
+
+    @IBOutlet weak var insideView: UIView!
+    @IBOutlet weak var pointValueSegment: UISegmentedControl!
+    @IBOutlet weak var sliderMusic: UISlider!
+    @IBOutlet weak var sliderFx: UISlider!
+    
+    var fxVolumeCheck : AVAudioPlayer?
+  //  var volumeHandler = JPSVolumeButtonHandler()
+    var count : Float = 0.5
+    var backSound = 0.025
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        /*Handle event when user press volume up down button*/
+       // volumeButtonPress()
+        
+        /*Set Initial values for sliders*/
+        setSliderValue()
+        
+        /*Set Slider Actions*/
+        setSliderAction()
+        
+        /*addFxVolumeCheckPlayer*/
+        addFxVolumeCheckPlayer()
+        
+        /*Set segment control value*/
+        setSegmentValue()
+  
+    }
+    
+    func setSegmentValue(){
+    
+        if(UserDefaults.standard.float(forKey: "pointsLevel")) == 25 {
+        
+            pointValueSegment.selectedSegmentIndex = 0
+        }
+        else{
+            pointValueSegment.selectedSegmentIndex = 1
+        }
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    /*Method to set slider value*/
+    func setSliderValue(){
+    
+        sliderMusic.value = (UserDefaults.standard.float(forKey: "musicVolume"))
+        sliderFx.value = (UserDefaults.standard.float(forKey: "fxVolume"))
+    }
+    
+    /*Set Sliders Actions*/
+    func setSliderAction(){
+        
+        sliderMusic.addTarget(self, action: #selector(musicVolume), for: .valueChanged)
+        sliderFx.addTarget(self, action: #selector(fxVolume), for: .valueChanged)
+    }
+    
+//    /*Volume Button Pressed */
+//    func volumeButtonPress(){
+//        
+//        volumeHandler = JPSVolumeButtonHandler.init(up:{
+//            
+//            if( self.count < 0.05) {
+//                
+//                self.count = self.count + 0.005
+//                self.sliderMusic.value = self.count
+//                self.musicVolume(sender:self.sliderMusic)
+//            }
+//            else {
+//                print("value = 0.05")
+//            }
+//        },downBlock: {
+//            
+//            if( self.count == 0.05 || self.count > 0) {
+//                
+//                self.count = self.count - 0.005
+//                self.sliderMusic.value = self.count
+//                self.musicVolume(sender:self.sliderMusic)
+//            }
+//            else {
+//                print("value = 0")
+//            }
+//        })
+//    }
+    
+    /*Music Slider Action*/
+    func musicVolume(sender:UISlider){
+        
+        self.count = sender.value
+        let value : Float = sender.value
+        SoundManager.sharedInstance.setMusicVolume(value: value)
+    }
+    
+    /*FX Slider Action*/
+    func fxVolume(sender:UISlider) {
+
+        fxVolumeCheck?.setVolume(sender.value, fadeDuration: 0)
+        let value : Float = sender.value
+        SoundManager.sharedInstance.setFxVolume(value: value)
+    }
+    
+    @IBAction func fxSliderDragAction(_ sender: Any) {
+
+        fxVolumeCheck?.pause()
+        fxVolumeCheck?.currentTime = 0.0
+        fxVolumeCheck?.play()
+    }
+    
+    /*Segment Control Action */
+    @IBAction func segmentControl(_ sender: UISegmentedControl) {
+        
+        switch sender.selectedSegmentIndex {
+        case 0:
+            UserDefaults.standard.set(25, forKey: "pointsLevel")
+            break
+        case 1:
+            UserDefaults.standard.set(50, forKey: "pointsLevel")
+            break
+        default:
+            break
+        }
+    }
+    /*Back Action*/
+    @IBAction func btnBack(_ sender: AnyObject) {
+
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    /*TouchDown Action*/
+    @IBAction func backTouchDown(_ sender: Any) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+    
+    /**/
+    func addFxVolumeCheckPlayer(){
+        
+        let url = Bundle.main.url(forResource: "BELL FOR GOOD GUESS", withExtension: "wav")!
+    
+        do {
+            fxVolumeCheck = try AVAudioPlayer(contentsOf: url)
+            guard let fxVolumeCheck = fxVolumeCheck else { return }
+            fxVolumeCheck.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+}
+
+

@@ -1,0 +1,57 @@
+//
+//  TapViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 12/01/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class TapViewController: UIViewController {
+
+    @IBOutlet weak var img1: UIImageView!
+    
+    var frame = CGRect()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Do any additional setup after loading the view.
+        var tap = UITapGestureRecognizer()
+        tap = UITapGestureRecognizer(target: self, action: #selector(tapAction))
+        img1.addGestureRecognizer(tap)
+        img1.isUserInteractionEnabled = true
+        
+        print(img1.bounds)
+        print(img1.frame.origin.x)
+    }
+    
+    func tapAction() {
+
+    UIView.animate(withDuration: 0.5) {
+        
+        self.img1.frame = CGRect(x: 0, y: 0, width: 320, height: 568)
+        
+        }
+        
+        UIView.animate(withDuration:0.3 , animations: {
+            self.img1.frame = self.view.frame
+            }) { (true) in
+                self.completionAction()
+        }
+    }
+    
+    func completionAction(){
+    
+        UIView.animate(withDuration: 0.5) {
+            self.img1.frame = CGRect(x: 130, y: 130, width: 150, height: 200)
+        }
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+}

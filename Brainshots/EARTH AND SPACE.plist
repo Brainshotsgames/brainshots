@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   EARTHSPACE.plist
+   Brainshots
+
+   Created by Amritpal Singh on 29/03/17.
+   Copyright (c) 2017 Anuradha Sharma. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>WordPack</key>
+        <array>
+            <string>thunder</string>
+            <string>lightning</string>
+            <string>rain</string>
+            <string>snow</string>
+            <string>mountain</string>
+            <string>river</string>
+            <string>sky</string>
+            <string>clouds</string>
+            <string>fly</string>
+            <string>moon</string>
+            <string>stars</string>
+            <string>sun</string>
+            <string>space</string>
+            <string>Earth</string>
+            <string>blue</string>
+            <string>day</string>
+            <string>world</string>
+            <string>air</string>
+            <string>wind</string>
+            <string>around</string>
+            <string>dark</string>
+            <string>end</string>
+            <string>every</string>
+            <string>fall</string>
+            <string>Summer</string>
+            <string>fire</string>
+            <string>trees</string>
+            <string>Mars</string>
+            <string>rocket</string>
+            <string>rose</string>
+            <string>city</string>
+            <string>cold</string>
+            <string>hot</string>
+            <string>green</string>
+            <string>from</string>
+            <string>heaven</string>
+            <string>hell</string>
+            <string>ice</string>
+            <string>keep</string>
+            <string>land</string>
+            <string>leave</string>
+            <string>life</string>
+            <string>light</string>
+            <string>climb</string>
+            <string>yellow</string>
+            <string>rainbow</string>
+            <string>my</string>
+            <string>out</string>
+            <string>paradise</string>
+            <string>park</string>
+            <string>picture</string>
+            <string>rise</string>
+            <string>sail</string>
+            <string>sea</string>
+            <string>diamond</string>
+            <string>shine</string>
+            <string>ship</string>
+            <string>one</string>
+            <string>start</string>
+            <string>storm</string>
+            <string>survive</string>
+            <string>wait</string>
+            <string>walk</string>
+            <string>water</string>
+            <string>week</string>
+        </array>
+        <key>LightningRound</key>
+        <array>
+            <string>Sing as many Winter songs as you can</string>
+            <string>Sing as many songs whose titles start with letter “T”</string>
+            <string>Sing as many songs from boy bands as you can</string>
+            <string>Sing as many songs as you can with the words “sun” or “rain”</string>
+            <string>Sing as many songs whose titles start with letter “W”</string>
+            <string>Sing as many songs about things in nature as you can</string>
+            <string>Sing as many songs as you can with the words “light” or “dark”</string>
+            <string>Sing as many songs that contain outer space words</string>
+            <string>Sing as many songs about different modes of transportation</string>
+            <string>Sing as many songs about different types of birds</string>
+            <string>Sing as many songs whose titles start with letter “D”</string>
+            <string>Sing as many songs as you can with the numbers one, two or three</string>
+            <string>Sing as many songs as you can with the words “hot” or “cold”</string>
+            <string>Sing as many songs as you can with different months</string>
+            <string>Sing as many songs about things that are in the air/go up</string>
+        </array>
+    </dict>
+</plist>

@@ -1,0 +1,63 @@
+//
+//  InAppPurchaseViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class InAppPurchaseViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout {
+
+    @IBOutlet weak var lblTitle: UILabel!
+    @IBOutlet weak var collectionView: UICollectionView!
+    var arrayPacks = NSArray()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: lblTitle)
+        arrayPacks = ["Word Pack One","Word Pack Two","Word Pack Three","Word Pack Four"]
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+
+    // MARK:- Collection View DataSource and Delegates
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    
+        return arrayPacks.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    
+        let cellId = "Cell"
+        let cell : InAppPurchaseCell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! InAppPurchaseCell
+        cell.lblWordPack.text = String(describing: arrayPacks.object(at: indexPath.row))
+        return cell
+    
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    
+        return CGSize(width: (self.collectionView.frame.size.width/2) - 2 , height: (self.collectionView.frame.size.width / 2) + 10 )
+    }
+    
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+        
+    }
+  
+}

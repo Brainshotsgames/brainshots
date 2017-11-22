@@ -1,0 +1,174 @@
+//
+//  ConnectedPlayersViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 22/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+import MBProgressHUD
+
+class ConnectedPlayersViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,IPSessionDelegate {
+    
+    @IBOutlet weak var tableView: UITableView!
+    var players = [MCPeerID]()
+    var timer = Timer()
+    @IBOutlet weak var btnStart: UIButton!
+    var showProgress = Bool()
+    
+    @IBOutlet weak var btnPrevConstraint: NSLayoutConstraint!
+    override func viewDidLoad() {
+        
+        //duplicatePeerCheck
+        UserDefaults.standard.set(true, forKey: "duplicatePeerCheck")
+        
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        super.viewWillAppear(animated)
+        btnStart.isHidden = true
+        appDelegate.IPSession.delegate = self
+        btnPrevConstraint.constant = self.view.frame.size.width/2-btnStart.frame.size.width/2
+        
+        timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector
+            (updateTable), userInfo: nil, repeats: true)
+        
+    }
+    
+    func addProgressHud() {
+        
+        let progress = MBProgressHUD.showAdded(to: tableView, animated: true)
+        progress.bezelView.color = .white
+        progress.activityIndicatorColor = kBaseRed
+        progress.animationType = .zoomIn
+        
+        progress.label.text = "Searching Players"
+        progress.label.textColor = kBaseRed
+        progress.label.font = UIFont.init(name: kFatFrankRegular, size: 20)
+        
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    /*Reloads table if player found*/
+    func updateTable() {
+        
+        players = (appDelegate.IPSession.session?.connectedPeers)!
+        enableStartButton()
+        tableView.reloadData()
+    }
+    
+    
+    /*Check for connection*/
+    func enableStartButton() {
+        
+        if(players.count > 0){
+            
+            if(btnStart.isHidden == true){
+                
+                MBProgressHUD.hide(for: tableView, animated: true)
+                animatePrevButton()
+                btnStart.isHidden = false
+                showProgress = false
+            }
+        }
+        else if players.count == 0 {
+         
+            if(showProgress == false){
+                addProgressHud()
+            }
+            showProgress = true
+            btnStart.isHidden = true
+            btnPrevConstraint.constant = self.view.frame.size.width/2-btnStart.frame.size.width/2
+        }
+    }
+    
+    /*Animate Prev Button*/
+    func animatePrevButton() {
+        
+        btnPrevConstraint.constant = 16
+        UIView.animate(withDuration: 0.5) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    //MARK:- UITableview Delegates
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return players.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "cellid"
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
+        
+        var peerId : MCPeerID?
+        peerId = players[indexPath.row]
+        let hostNameStr : String = "\(peerId!.displayName)"
+        cell.textLabel?.font = UIFont.init(name: kFatFrankRegular, size: 32);
+        
+        cell.textLabel?.text = hostNameStr.capitalized
+        cell.textLabel?.textColor = UIColor.white
+        cell.textLabel?.textAlignment = .center
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 50
+    }
+    
+    //MARK:- IPSession Delegate
+    func receiveMessage(message: String, from peerid: MCPeerID) {
+        
+        print(message)
+        
+        DispatchQueue.main.async {
+            
+            if(message == "selected"){
+                CommonFunctions.sharedInstance.addPlayers(peer:peerid)
+            }
+        }
+
+    }
+    //MARK:- Navigate
+    func navigateToSelectPlay() {
+        
+        _ = self.navigationController?.popToViewController((self.navigationController?.viewControllers[3])!, animated: true)
+    }
+    
+    //MARK:- Actions
+    @IBAction func btnStart(_ sender: Any) {
+        
+        timer.invalidate()
+        appDelegate.IPSession.advertiserAssistant?.stopAdvertisingPeer()
+        CommonFunctions.sharedInstance.connectedPlayers = players
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: kChooseShotVC) as! ChooseShotViewController
+        self.navigationController?.pushViewController(controller, animated: true)
+        
+    }
+    
+    @IBAction func btnBack(_ sender: Any) {
+        
+        timer.invalidate()
+        appDelegate.IPSession.session?.disconnect()
+        appDelegate.IPSession.advertiserAssistant?.stopAdvertisingPeer()
+        UserDefaults.standard.set(false, forKey: "duplicatePeerCheck")
+        navigateToSelectPlay()
+    }
+    
+    //MARK: TouchDown Actions
+    @IBAction func touchDown(_ sender: AnyObject) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+}

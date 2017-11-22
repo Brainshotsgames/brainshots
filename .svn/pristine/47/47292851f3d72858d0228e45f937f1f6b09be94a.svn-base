@@ -1,0 +1,95 @@
+//
+//  HostViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 20/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+class HostViewController: UIViewController,UITextFieldDelegate {
+
+    @IBOutlet weak var txtHostName: UITextField!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        txtHostName.delegate = self
+        UserDefaults.standard.set(false, forKey: "isInvited")
+        fillHostName()
+        // Do any additional setup after loading the view.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func fillHostName() {
+    
+        if UserDefaults.standard.bool(forKey: "login") {
+        
+            let dict : NSMutableDictionary =  CommonFunctions.sharedInstance.getProfileDetails()
+            txtHostName.text = (dict.value(forKey: "firstName") as! String?)!
+        }
+        else{
+            
+            txtHostName.text = UIDevice.current.name
+        }
+    }
+    
+    //MARK:- Advertising Peer
+    func startAdvertise() {
+        
+        //Create the SessionContainer for managing session related functionality.
+        let string  = txtHostName.text!
+        let hostName = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        appDelegate.IPSession = IndividualSession.init(displayName:hostName, serviceType: "connect",ifAdvertise: true)
+    }
+    
+    //MARK:- Text Field Delegate
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        txtHostName.resignFirstResponder()
+        return true
+    }
+
+    //MARK:- Actions
+    @IBAction func btnNext(_ sender: Any) {
+        
+        if(!((txtHostName.text?.isEmpty)!)) {
+        
+            startAdvertise()
+            
+            let hostPeer : MCPeerID = (appDelegate.IPSession.session?.myPeerID)!
+            CommonFunctions.sharedInstance.setHostID(peerID:hostPeer)
+            
+            UserDefaults.standard.set(true, forKey: "isHost")
+            
+            navigate()
+        }
+    }
+    
+    @IBAction func btnBack(_ sender: Any) {
+        
+        appDelegate.IPSession.session?.disconnect()
+        appDelegate.IPSession.advertiserAssistant?.stopAdvertisingPeer()
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK:- TouchDown Actions
+    @IBAction func touchDown(_ sender: AnyObject) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+    
+    //MARK:- Navigate
+    func navigate(){
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "ConnectedPlayersViewController") as! ConnectedPlayersViewController
+        self.navigationController?.pushViewController(controller, animated: true)
+        
+    }
+   
+}

@@ -1,0 +1,50 @@
+//
+//  TeamPlayViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class TeamPlayViewController: UIViewController {
+
+    //MARK:- Outelts
+    @IBOutlet weak var lblTeamName: UILabel!
+    @IBOutlet weak var btnShotGun: UIButton!
+    @IBOutlet weak var backView: UIView!
+    
+    //MARK:- Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    //MARK:- Actions
+    @IBAction func btnCreateTeam(_ sender: Any) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"CreateTeamViewController") as! CreateTeamViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @IBAction func btnJoinTeam(_ sender: Any) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"JoinTeamViewController") as! JoinTeamViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+
+    @IBAction func touchDown(_ sender: AnyObject) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+}

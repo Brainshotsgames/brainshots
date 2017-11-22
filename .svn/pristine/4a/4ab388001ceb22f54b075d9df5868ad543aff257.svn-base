@@ -1,0 +1,301 @@
+//
+//  Constants.swift
+//  TravellerApp
+//
+//  Created by Amritpal Singh on 05/10/16.
+//  Copyright © 2016 Amritpal Singh. All rights reserved.
+//
+
+import Foundation
+import FBSDKCoreKit
+import FBSDKLoginKit
+import FBSDKShareKit
+import CoreData
+
+
+let kBaseRed = UIColor.init(colorLiteralRed: 176.0/255.0, green: 26.0/255.0, blue: 21.0/255.0, alpha: 1)
+
+public func delay(_ delay:Double, closure:@escaping ()->()) {
+    DispatchQueue.main.asyncAfter(
+        deadline: DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: closure)
+}
+
+//MARK:- Shared instance
+var appDelegate:AppDelegate {
+    return UIApplication.shared.delegate as! AppDelegate
+}
+
+
+//MARK:- Device type
+/*Check Device Type*/
+struct DeviceType {
+    
+    static let IS_IPHONE_4_OR_LESS  = UIDevice.current.userInterfaceIdiom == .phone && ScreenSize.SCREEN_MAX_LENGTH < 568.0
+    static let IS_IPHONE_5          = UIDevice.current.userInterfaceIdiom == .phone && ScreenSize.SCREEN_MAX_LENGTH == 568.0
+    static let IS_IPHONE_6          = UIDevice.current.userInterfaceIdiom == .phone && ScreenSize.SCREEN_MAX_LENGTH == 667.0
+    static let IS_IPHONE_6P         = UIDevice.current.userInterfaceIdiom == .phone && ScreenSize.SCREEN_MAX_LENGTH == 736.0
+    static let IS_IPAD              = UIDevice.current.userInterfaceIdiom == .phone && ScreenSize.SCREEN_MAX_LENGTH == 1024.0
+    static let IS_IPAD_PRO          = UIDevice.current.userInterfaceIdiom == .phone && ScreenSize.SCREEN_MAX_LENGTH == 1366.0
+}
+
+enum UIUserInterfaceIdiom : Int {
+    
+    case Unspecified
+    case Phone
+    case Pad
+}
+
+struct ScreenSize {
+    
+    static let SCREEN_WIDTH         = UIScreen.main.bounds.size.width
+    static let SCREEN_HEIGHT        = UIScreen.main.bounds.size.height
+    static let SCREEN_MAX_LENGTH    = max(ScreenSize.SCREEN_WIDTH, ScreenSize.SCREEN_HEIGHT)
+    static let SCREEN_MIN_LENGTH    = min(ScreenSize.SCREEN_WIDTH, ScreenSize.SCREEN_HEIGHT)
+}
+
+/*Main Color for App*/
+let mainColor = UIColor.init(colorLiteralRed: 51.0/255.0, green: 169.0/255.0, blue: 242.0/255.0, alpha: 1.0)
+let kBaseColor = UIColor.init(colorLiteralRed:147.0/255.0, green: 23.0/255.0, blue: 23.0/255.0, alpha: 1.0)
+
+/*Check Platform*/
+struct Platform {
+    static let isSimulator: Bool = {
+        var isSim = false
+        #if arch(i386) || arch(x86_64)
+            isSim = true
+        #endif
+        return isSim
+    }()
+}
+
+/*Declare fblogin Manager*/
+private var _fbLoginManager: FBSDKLoginManager?
+var fbLoginManager: FBSDKLoginManager {
+get {
+    if _fbLoginManager == nil {
+        _fbLoginManager = FBSDKLoginManager()
+    }
+    return _fbLoginManager!
+ }
+}
+
+//MARK:- Valid Email String
+/*Check for String is Valid Email*/
+extension String {
+    
+    func isValidEmail() -> Bool {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{1,10}"
+        let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailTest.evaluate(with: self)
+    }
+    
+    var isAlphanumeric: Bool {
+        return range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
+    }
+
+}
+
+//MARK:- Random Array Element
+/*Get Random Element from Array*/
+extension Array {
+    var randomElement: Element {
+        let index = Int(arc4random_uniform(UInt32(count)))
+        return self[index]
+    }
+}
+
+//MARK:- Coredata Context
+/*Get Context from CoreData*/
+func getContext () -> NSManagedObjectContext {
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    return appDelegate.persistentContainer.viewContext
+}
+
+//MARK:- Dictionary to Json String
+/*Convert Dictionary to Json String*/
+func getJsonString(dict:[String:Any])->String {
+    
+    var validData = Data()
+    var str = String()
+    
+    do {
+        validData  = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
+        str  = String.init(data:validData , encoding: .utf8)!
+    }
+    catch {
+        print(error)
+    }
+    
+    return str
+}
+
+/*Convert Json String to Dictionary*/
+func convertJsonToDictionary(json: String) -> [String: Any]? {
+    if let data = json.data(using: .utf8) {
+        do {
+            return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    return nil
+}
+
+//MARK:- POP UP Animation
+func setPopupAnimation(target:UIView){
+    
+    target.transform = CGAffineTransform.init(scaleX:  0.001, y: 0.001)
+    
+    UIView.animate(withDuration: 0.3/1.5, animations: {
+        target.transform = CGAffineTransform.init(scaleX:  1.1, y: 1.1)
+    }, completion:{ (true) in
+        UIView.animate(withDuration: 0.3/2, animations: {
+            target.transform = CGAffineTransform.init(scaleX: 0.9, y: 0.9)
+        }, completion:{ (true) in
+            UIView.animate(withDuration: 0.3/2, animations: {
+                target.transform = .identity
+            })
+        })
+    })
+}
+
+//MARK:- Shots Table View Cell Height
+/*Static Table view cell height for different shot seletc screens*/
+func tableviewCellHeight()-> CGFloat {
+    
+    var height = CGFloat()
+    
+    if DeviceType.IS_IPHONE_4_OR_LESS{
+        
+        height = 33
+    }
+    else if DeviceType.IS_IPHONE_5 {
+        
+        height = 42
+    }
+    else if DeviceType.IS_IPHONE_6 {
+        
+        height = 49
+    }
+    else if DeviceType.IS_IPHONE_6P {
+        
+        height = 53
+    }
+    
+    return height
+}
+
+func fontSizeForShot()->CGFloat{
+    
+    var height = CGFloat()
+    
+    if DeviceType.IS_IPHONE_4_OR_LESS{
+        
+        height =  20
+    }
+    else if DeviceType.IS_IPHONE_5 {
+        height = 22
+    }
+    else if DeviceType.IS_IPHONE_6 {
+        height = 25
+    }
+    else if DeviceType.IS_IPHONE_6P {
+        height = 27
+    }
+    
+    return height
+}
+
+//MARK:- Static Fields
+//MARK: PopUp Messages
+
+let kLogoutMessage = "Are you sure you ant to logout?"
+let kSaveProfileAlert = "Profile save sucessfully."
+let kFieldsEmpty = "Fields must not be empty."
+
+
+let Individual_Play_Text = "After all players login and “shots” are chosen, you are ready to play.  The game chooses the first player.  This player must sing a song using the random word on the screen in one or two lines.  If a player successfully sings a song with that word before the 10 seconds are up, that player swipes right for a point.  Play continues with the next player who uses the same word in a new song.  If the time runs out before a song is sung, the player is out of the round and must take their shot. The round is over when everyone has run out of new songs to sing. The last player to successfully sing a song is the winner of the round, gets an additional point and does not have to take a shot."
+
+let Individual_Play_Continued = "The new round begins with player 2 and everyone is back in for the next \"random word.\"  No song may be repeated in the same round.  You can use a variation of the word (eg. love, lover, loving). You must 'sing' the song, no talking!  Once per game, each player is randomly selected for a lightning round to gain extra points (as many songs as you can sing in a category in 30 seconds)."
+
+let Team_Play_Content = "In 'team play', only one phone is used per team.  A set up screen will allow the leader to create a team nickname and the team must decide their \"shot\" together.  The leader will be in charge of swiping for answers during game play.  Only one player on the team can sing during a turn.  In lightning rounds, the team leader will select a rep from the team to play."
+
+
+
+let kPlayerAlreadyExistsTitle = "Please  start again"
+let kPlayerAlreadyExists = "Player name is already exist.Please change your profile name or login with facebook."
+let kConnectionLostTitle = "Connection Failed"
+let kConnectionLostMessage = "Unable to connect to the Host."
+let kConnectionLost = "Connection Lost"
+let kStartAgain = "Please  start again"
+
+//MARK: Basic Font
+let kFatFrankRegular = "FatFrank-Regular"
+let kDSDigitalBold = "DS-Digital-Bold"
+
+//MARK:- Sound Names
+let kGoodGuessBell = "BELL FOR GOOD GUESS"
+
+
+//MARK:- Extensions
+let kGif = "gif"
+let kWav = "wav"
+
+//MARK:- Animation Gifs
+let kSingHit = "SingHit750"
+let kDrinker = "Drinker"
+let kThinker = "Thinker"
+let kKitchenSinker = "Kitchen Sinker"
+let kCountDown  = "Countdown_low"
+
+//MARK:- StoryBoard Reference
+let kHomeSB = "Home"
+let kIndividualGamePlay = "GamePlay"
+
+//MARK:- ViewController Reference
+let kHomeVC             = "HomeViewController"
+let kProfileVC          = "ProfileViewController"
+let kEditProfileVC      = "EditProfileViewController"
+let kTerms_ConditionVC  = "TermsConditionsViewController"
+let kOptionsVC          = "OptionsViewController"
+let kHowToPlayVC        = "TutorialViewController"
+let kSoundOptionsVC     = "SoundViewController"
+let kCreditVC           = "CreditViewController"
+let kLegalDisclaimerVC  = "LegalDisclaimerViewController"
+let kMoreGamesVC        = "MoreGamesViewController"
+let kInAppPurchaseVC    = "InAppPurchaseViewController"
+let kSelectPlayVC       = "SelectPlayViewController"
+let kIndividualPlayVC   = "IndividualPlayViewController"
+let kHostVC             = ""
+let kConnectedPlayerVC  = "ConnectedPlayersViewController"
+let kGamesAvailabelVC   = ""
+let kChooseShotVC       = "ChooseShotViewController"
+let kDrinkerVC          = "DrinkerViewController"
+let kSinkerVC           = "SinkerViewController"
+let kThinkerVC          = "ThinkerViewController"
+let kPartyStartedVC     = "PartyStartedViewController"
+let kSingVC             = "SingViewController"
+let kExtraPointVC       = "ExtraPointViewController"
+let kLeaderBoardVC      = "LeaderBoardViewController"
+let kLightningAnimationVC = "IntroLightningViewController"
+let kLightningRoundVC   = "LightningViewController"
+let kVictoryAnimationVC = "VictoryAnimationViewController"
+let kVictoryVC          = "VictoryViewController"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

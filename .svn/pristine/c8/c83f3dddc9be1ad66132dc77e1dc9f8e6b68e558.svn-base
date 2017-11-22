@@ -1,0 +1,128 @@
+//
+//  SingViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 09/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class SingViewController: UIViewController {
+    
+    var countPlayer : AVAudioPlayer?
+    @IBOutlet weak var lblTimer: UILabel!
+    
+    var timer = Timer()
+    var count : NSInteger = 0
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        /*Add count sound to self*/
+        addCountSound()
+        
+        /*Set initial text to timer label*/
+        lblTimer.text = ""
+        
+        /*Add counting animation after 0.2 second delay*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
+          self.addCounterAnimation()
+        }
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK: Animation
+    /*Start Counting Animation at startup*/
+    func addCounterAnimation(){
+    
+        var imgSinker = UIImage()
+        let showAnimationImgView = UIImageView()
+        showAnimationImgView.frame = self.view.frame
+        self.view.addSubview(showAnimationImgView)
+        
+        var url = NSURL()
+        var data = Data()
+        url = Bundle.main.url(forResource: "Countdown_Medium", withExtension: "gif")! as NSURL
+        
+        do {
+            data = try Data.init(contentsOf: url as URL)
+        } catch {
+            print(error)
+        }
+        
+        imgSinker = UIImage.animatedImage(withAnimatedGIFData:data)!
+        showAnimationImgView.animationImages = imgSinker.images
+        showAnimationImgView.animationDuration = imgSinker.duration
+        showAnimationImgView.animationRepeatCount = 1
+        showAnimationImgView.image = imgSinker.images?.last
+        showAnimationImgView.startAnimating()
+        
+        /*Play Count Sound after loading count animation*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        
+            self.countPlayer?.prepareToPlay()
+            self.countPlayer?.play()
+        }
+        
+        /*Block to show Popup ( Your Drink is *** )*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            
+            showAnimationImgView.removeFromSuperview()
+            let text = "Random Word"
+            let popUp = PopupView.init(frame: CGRect(x: self.view.frame.size.width/2 - 80, y: self.view.frame.size.height/2 - 50, width: 160, height: 100))
+            popUp.backgroundColor = UIColor.clear
+            popUp.layer.borderColor = UIColor.clear.cgColor
+            popUp.label.font = UIFont.init(name: "FatFrank-Regular", size:35.0)
+            popUp.setLabel(text:text)
+            popUp.setTransitionToController(target:self)
+            
+            /*Start Timer after words appear*/
+            self.startTimer()
+            
+        }
+            self.view.isUserInteractionEnabled = true
+    }
+    
+    //MARK: Timer
+    /*Start timer method*/
+    func startTimer() {
+    
+     timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
+    }
+    
+    /*Call method to run timer for 10 seconds*/
+    func runTimedCode(){
+        
+        if(count == 10) {
+            timer.invalidate()
+        }
+        
+        lblTimer.text = "\(count)"
+        count += 1
+    }
+    
+    //MARK: Sound
+    /*Add Counting Sound*/
+    func addCountSound(){
+        
+        let url = Bundle.main.url(forResource: "Count", withExtension: "wav")!
+        
+        do {
+            countPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let countPlayer = countPlayer else { return }
+            countPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+}

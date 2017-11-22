@@ -1,0 +1,200 @@
+//
+//  LightningViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 10/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class LightningViewController: UIViewController {
+
+    @IBOutlet weak var imgBackground: UIImageView!
+    @IBOutlet weak var lblTimer: UILabel!
+    @IBOutlet weak var lblWord: UILabel!
+    @IBOutlet weak var lblResult: UILabel!
+    var countPlayer : AVAudioPlayer?
+    
+    var timer = Timer()
+    var count = NSInteger()
+    let swipeGesture = UISwipeGestureRecognizer()
+    var score : NSInteger = 0
+    
+     let leftTransition = CATransition()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        /*Add count sound to self*/
+        addCountSound()
+        
+        /*Add Shadow to Views*/
+        CommonFunctions.sharedInstance.setShadowToView(target:lblTimer)
+        CommonFunctions.sharedInstance.setShadowToView(target:lblWord)
+        CommonFunctions.sharedInstance.setShadowToView(target:lblResult)
+        
+        /*Add counting animation after 0.2 second delay*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
+            
+            self.addCounterAnimation()
+        }
+        
+        /*Add Swipe Transition*/
+        leftTransition.duration = 0.3
+        leftTransition.timingFunction = CAMediaTimingFunction.init(name: kCAMediaTimingFunctionEaseOut)
+        leftTransition.type = kCATransitionPush
+        leftTransition.subtype = kCATransitionFromRight
+        
+        /*Left Swipe Gesture*/
+        swipeGesture.direction = .left
+        swipeGesture.addTarget(self, action: #selector(swipeAction))
+        self.view.addGestureRecognizer(swipeGesture)
+        swipeGesture.isEnabled = false
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    /*Swipe Left Action*/
+    func swipeAction(){
+    
+        score += 1
+        print(score)
+        imgBackground.layer.add(leftTransition, forKey: nil)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK: Animation
+    /*Start Counting Animation at startup*/
+    func addCounterAnimation() {
+        
+        var imgSinker = UIImage()
+        let showAnimationImgView = UIImageView()
+        showAnimationImgView.frame = self.view.frame
+        self.view.addSubview(showAnimationImgView)
+        
+        var url = NSURL()
+        var data = Data()
+        url = Bundle.main.url(forResource: "Countdown_low", withExtension: "gif")! as NSURL
+        
+        do {
+            data = try Data.init(contentsOf: url as URL)
+        } catch {
+            print(error)
+        }
+        
+        imgSinker = UIImage.animatedImage(withAnimatedGIFData:data)!
+        showAnimationImgView.animationImages = imgSinker.images
+        showAnimationImgView.animationDuration = imgSinker.duration
+        showAnimationImgView.animationRepeatCount = 1
+        showAnimationImgView.image = imgSinker.images?.last
+        showAnimationImgView.startAnimating()
+        
+        /*Play Count Sound after loading count animation*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            
+            self.countPlayer?.prepareToPlay()
+            self.countPlayer?.play()
+        }
+        
+        /*Block to show Popup ( Your Drink is *** )*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            
+            /*Remove timer image animation from self*/
+            showAnimationImgView.removeFromSuperview()
+            
+            /*Start Timer after words appear*/
+            self.startCounting()
+            
+        }
+    }
+    
+    //MARK: Animation
+    /*Start Counting Animation at startup*/
+    func startCounting(){
+        
+            /*Popup Random Word*/
+            self.lblWord.text = "Word"
+            CommonFunctions.sharedInstance.setPopupAnimation(target: self.lblWord)
+            
+            /*Start Timer after word appear*/
+            count = 10
+            self.startTimer()
+            self.swipeGesture.isEnabled = true
+    }
+    
+    //MARK: Timer
+    /*Start timer method*/
+    func startTimer(){
+        
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
+        CommonFunctions.sharedInstance.setPopupAnimation(target:lblTimer)
+    }
+    
+    /*Call method to run timer for 10 seconds*/
+    func runTimedCode(){
+        
+        if(count == 0){
+            
+            timer.invalidate()
+            lblTimer.text = "\(count)"
+            perform(#selector(popResultStatus), with: nil, afterDelay: 1.0)
+        }
+        else {
+        
+            lblTimer.text = "\(count)"
+            count = count - 1
+        }
+    }
+    
+    /*Show Results*/
+    func popResultStatus(){
+        
+        lblTimer.isHidden = true
+        lblWord.isHidden = true
+        swipeGesture.isEnabled = false
+        
+        let  str : NSMutableAttributedString =  NSMutableAttributedString.init(string: "CONGRATS \n PLAYER ONE YOU GOT \n \(score) POINTS.")
+        
+        str.addAttribute(NSFontAttributeName,
+                                     value: UIFont(
+                                        name: "FatFrank-Regular",
+                                        size: 35.0)!,
+                                     range: NSRange(
+                                        location: 0,
+                                        length: 9))
+        
+        str.addAttribute(NSFontAttributeName,
+                         value: UIFont(
+                            name: "FatFrank-Regular",
+                            size: 32.0)!,
+                         range: NSRange(
+                            location: 32,
+                            length: 2))
+        
+        lblResult.attributedText = str
+        CommonFunctions.sharedInstance.setPopupAnimation(target: self.lblResult)
+    }
+    
+    //MARK: Sound
+    /*Add Counting Sound*/
+    func addCountSound(){
+        
+        let url = Bundle.main.url(forResource: "Count", withExtension: "wav")!
+        
+        do {
+            countPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let countPlayer = countPlayer else { return }
+            countPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+}

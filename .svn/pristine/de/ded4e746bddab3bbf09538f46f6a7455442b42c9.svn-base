@@ -1,0 +1,35 @@
+//
+//  MoreGamesViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class MoreGamesViewController: UIViewController {
+
+    @IBOutlet weak var lblTrivia: UILabel!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: lblTrivia)
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+         _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func btnBackTouchDown(_ sender: Any) {
+          CommonFunctions.sharedInstance.buttonPressedSound()
+    }
+}

@@ -1,0 +1,60 @@
+//
+//  CurtainsViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 12/01/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+protocol curtainsDelegate {
+    func showHideCurtains()
+}
+
+class CurtainsViewController: UIViewController {
+    
+    @IBOutlet weak var imgCurtains: FLAnimatedImageView!
+    var delegate:curtainsDelegate?
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        showCurtains()
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    func showCurtains() {
+    
+        let url1 : NSURL = Bundle.main.url(forResource: "Curtains_Close", withExtension: "gif")! as NSURL
+        let data1 = NSData(contentsOf: url1 as URL)
+        let animatedImage = FLAnimatedImage(gifData: data1 as Data!)
+        animatedImage?.loopCount = 1
+        imgCurtains.animatedImage = animatedImage
+        
+         perform(#selector(hideCurtains), with: nil, afterDelay: 2.5)
+    }
+    
+    func hideCurtains() {
+    
+        let url1 : NSURL = Bundle.main.url(forResource: "Curtains_Open", withExtension: "gif")! as NSURL
+        let data1 = NSData(contentsOf: url1 as URL)
+        let animatedImage = FLAnimatedImage(gifData: data1 as Data!)
+        animatedImage?.loopCount = 1
+        imgCurtains.animatedImage = animatedImage
+        perform(#selector(removeView), with: nil, afterDelay: 2.5)
+        
+    }
+    
+    func removeView() {
+    
+        delegate?.showHideCurtains()
+    
+    }
+    
+}

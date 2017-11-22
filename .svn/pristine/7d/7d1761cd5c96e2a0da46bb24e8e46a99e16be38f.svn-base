@@ -1,0 +1,50 @@
+//
+//  HowToPlayContViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class HowToPlayContViewController: UIViewController {
+    
+    //MARK:- Declare Properties
+    @IBOutlet var lblDescription: UILabel!
+    
+    //MARK:- View Did Load
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        //CommonFunctions.sharedInstance.setupButtonBorder(vw: lblDescription)
+//        lblDescription.text = "The new round begins with player 2 and everyone is back in for the next \"random word.\" No song may be repeated in the same round. You can use a variation of the word(eg. love, lover, loving) You must 'sing' the song, no talking! Once or twice per game, each player is randomly selected for a lightning round to gain extra points.(as many songs as you can sing in a category in 30 seconds)"
+        
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Button Action
+    
+    @IBAction func backBtn(_ sender: AnyObject)
+    {
+        _ = navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func forwardBtn(_ sender: AnyObject) {
+    }
+
+    /*
+    // MARK: - Navigation
+
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destinationViewController.
+        // Pass the selected object to the new view controller.
+    }
+    */
+
+}

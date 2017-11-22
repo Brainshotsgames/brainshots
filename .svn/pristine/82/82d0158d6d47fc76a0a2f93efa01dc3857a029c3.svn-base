@@ -1,0 +1,73 @@
+//
+//  SoundViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+import JPSVolumeButtonHandler
+
+class SoundViewController: UIViewController {
+
+    @IBOutlet weak var lblMusic: UILabel!
+    @IBOutlet weak var lblFX: UILabel!
+    @IBOutlet weak var lblVoice: UILabel!
+    @IBOutlet weak var pointValueSegment: UISegmentedControl!
+    var count : Float = 0.5
+    
+    @IBOutlet weak var sliderMusic: UISlider!
+    var volumeHandler = JPSVolumeButtonHandler()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: pointValueSegment)
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: lblMusic)
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: lblFX)
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: lblVoice)
+     
+        sliderMusic.value = count
+        
+        volumeHandler = JPSVolumeButtonHandler.init(up:{
+            
+                if( self.count < 1) {
+                
+                    self.count = self.count + 0.1
+                    self.sliderMusic.value = self.count
+                }
+                else {
+                    print("value = 1")
+                }
+            },downBlock: {
+                
+                if( self.count == 1 || self.count > 0) {
+                    
+                    self.count = self.count - 0.1
+                    self.sliderMusic.value = self.count
+                }
+                else {
+                    print("value = 0")
+                }
+            })
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+}
+
+

@@ -1,0 +1,26 @@
+//
+//  TeamPlayViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class TeamPlayViewController: UIViewController {
+
+    @IBOutlet weak var lblTeamName: UILabel!
+    @IBOutlet weak var btnShotGun: UIButton!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+}

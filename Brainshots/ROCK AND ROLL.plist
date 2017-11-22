@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   ROCK AND ROLL.plist
+   Brainshots
+
+   Created by Amritpal Singh on 29/03/17.
+   Copyright (c) 2017 Anuradha Sharma. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>WordPack</key>
+        <array>
+            <string>rock</string>
+            <string>roll</string>
+            <string>groove</string>
+            <string>cool</string>
+            <string>time</string>
+            <string>California</string>
+            <string>teen</string>
+            <string>born</string>
+            <string>woman</string>
+            <string>purple</string>
+            <string>midnight</string>
+            <string>sunshine</string>
+            <string>change</string>
+            <string>Mary</string>
+            <string>let</string>
+            <string>tonight</string>
+            <string>get</string>
+            <string>way</string>
+            <string>house</string>
+            <string>somebody</string>
+            <string>now</string>
+            <string>band</string>
+            <string>shout</string>
+            <string>power</string>
+            <string>war</string>
+            <string>fool</string>
+            <string>believe</string>
+            <string>wild</string>
+            <string>white</string>
+            <string>nothing</string>
+            <string>lucky</string>
+            <string>brown</string>
+            <string>new</string>
+            <string>close</string>
+            <string>got</string>
+            <string>carry</string>
+            <string>blood</string>
+            <string>all</string>
+            <string>after</string>
+            <string>hurt</string>
+            <string>hide</string>
+            <string>mile</string>
+            <string>peace</string>
+            <string>piano</string>
+            <string>right</string>
+            <string>know</string>
+            <string>black</string>
+            <string>name</string>
+            <string>come</string>
+            <string>school</string>
+            <string>do</string>
+            <string>little</string>
+            <string>think</string>
+            <string>run</string>
+            <string>fast</string>
+            <string>don’t</string>
+            <string>easy</string>
+            <string>feeling</string>
+            <string>magic</string>
+            <string>hotel</string>
+            <string>who</string>
+            <string>take</string>
+            <string>street</string>
+            <string>lady</string>
+            <string>doctor</string>
+        </array>
+        <key>LightningRound</key>
+        <array>
+            <string>Sing as many songs as you can with the words “rock” or “roll”</string>
+            <string>Sing as many songs whose titles start with letter “S”</string>
+            <string>Sing as many 70’s songs as you can</string>
+            <string>Sing as many songs as you can with the words “black” or “white”</string>
+            <string>Sing as many songs from British Artists as you can</string>
+            <string>Sing as many songs about different cars</string>
+            <string>Sing as many songs whose titles start with letter “M”</string>
+            <string>Sing as many songs as you can with the words “easy” or “hard”</string>
+            <string>Sing as many songs that contain a day of the week</string>
+            <string>Sing as many TV themes as you can</string>
+            <string>Sing as many Summer songs as you can</string>
+            <string>Sing as many as many songs as you can with the words “fast” or “slow”</string>
+            <string>Sing as many songs that contain the name of a musical instrument</string>
+            <string>Sing as many songs whose titles start with letter “Y”</string>
+            <string>Sing as many songs as you can with the words “up” or “down”</string>
+        </array>
+    </dict>
+</plist>

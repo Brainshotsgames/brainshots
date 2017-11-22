@@ -1,0 +1,50 @@
+//
+//  SelectPlayViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class SelectPlayViewController: UIViewController {
+
+    @IBOutlet weak var btnTeamPlay: UIButton!
+    @IBOutlet weak var btnIndividualPlay: UIButton!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK: TouchUp Actions
+    @IBAction func btnIndividualPlay(_ sender: Any) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"ChooseShotViewController") as! ChooseShotViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @IBAction func btnTeamPlay(_ sender: Any) {
+        
+//        let vc = self.storyboard?.instantiateViewController(withIdentifier:"TeamPlayViewController") as! TeamPlayViewController
+//        self.navigationController?.pushViewController(vc, animated: true)
+        
+    }
+    
+    //MARK: BACK BUTTON
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK: TouchDown Actions
+    @IBAction func touchDown(_ sender: AnyObject) {
+        CommonFunctions.sharedInstance.buttonPressedSound()
+    }
+}

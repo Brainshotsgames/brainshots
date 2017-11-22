@@ -1,0 +1,201 @@
+//
+//  ProfileViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import FBSDKCoreKit
+import FBSDKLoginKit
+import FBSDKShareKit
+import CoreData
+
+class ProfileViewController: UIViewController {
+    
+    //MARK: Labels
+    @IBOutlet var lblUserName: UILabel!
+    @IBOutlet var lblName: UILabel!
+    @IBOutlet var lblCountry: UILabel!
+    @IBOutlet var lblGender: UILabel!
+    @IBOutlet var lblDate: UILabel!
+    @IBOutlet var lblGamesPlayed: UILabel!
+    @IBOutlet var lblBestGame: UILabel!
+    
+    //MARK: UIImage View
+     @IBOutlet var imgProfile: UIImageView!
+    
+    //MARK: Buttons
+    @IBOutlet var btnEditProfile: UIButton!
+    @IBOutlet var btnLogout: UIButton!
+    
+    //MARK: Views
+    @IBOutlet weak var statsConsraint: NSLayoutConstraint!
+     @IBOutlet var vwGameStats: UIView!
+    
+    //MARK: Variables
+    var first_name = String()
+    var last_name = String()
+    var email = String()
+    var gender = String()
+    var date = String()
+    var country = String()
+    
+    //MARK: View Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        addBestGames()
+        
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: imgProfile)
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: vwGameStats)
+        
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        
+        super.viewWillAppear(true)
+        checkLoginStatus()
+        
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    
+    //MARK: Check Login Status
+    func checkLoginStatus() {
+        
+        if(UserDefaults.standard.bool(forKey: "login") == true) {
+        
+            getProfileDetails()
+            profileImage()
+            btnEditProfile.isHidden = false
+            btnLogout.isHidden = false
+            statsConsraint.constant = 20
+            
+        } else {
+        
+            lblUserName.text = ""
+            lblName.text = UIDevice.current.name
+            lblGender.text = "Male"
+            lblCountry.text = "USA"
+            lblDate.text = "Joined Brainshots: \(CommonFunctions.sharedInstance.getCurrentDate())"
+            imgProfile.image = UIImage(named:"ProfilePlaceHolder")
+            btnEditProfile.isHidden = true
+            btnLogout.isHidden = true
+            statsConsraint.constant = -30
+        }
+    }
+    
+    //MARK: Get Profile Details
+    func getProfileDetails() {
+    
+        let dict : NSMutableDictionary =  CommonFunctions.sharedInstance.getProfileDetails()
+        
+            first_name      = (dict.value(forKey: "firstName") as! String?)!
+            last_name       = (dict.value(forKey: "lastName") as! String?)!
+            gender          = (dict.value(forKey: "gender") as! String?)!
+            date            = (dict.value(forKey: "date") as! String?)!
+            country         = (dict.value(forKey: "country") as! String?)!
+            email           = (dict.value(forKey: "email") as! String?)!
+
+            lblName.text = ("\(first_name) \(last_name)")
+            lblUserName.text = email
+            lblGender.text = gender
+            lblCountry.text = country
+            lblDate.text = "Joined Brainshots: \(date)"
+    }
+    
+    func profileImage() {
+    
+        /*UIImage to return User Profile Image*/
+        var image = UIImage()
+       
+        
+        /*Get Context*/
+        let context = getContext()
+        let entity =  NSEntityDescription.entity(forEntityName: "Profile", in: context)
+        let request: NSFetchRequest<Profile> = Profile.fetchRequest()
+        request.entity = entity
+        do {
+             let fetchResults = try getContext().fetch(request)
+            
+            for trans in fetchResults as [NSManagedObject] {
+            let imageData   = trans.value(forKey: "image") as! Data
+            image = UIImage(data: imageData)!
+                
+            }
+        }
+        
+        catch let error as NSError {
+    
+            print(error.localizedDescription)
+        }
+        
+         imgProfile.image = CommonFunctions.sharedInstance.cropToBounds(image: image, width: Double(imgProfile.frame.size.width), height: Double(imgProfile.frame.size.height))
+    }
+
+    //MARK: Button Actions
+    @IBAction func btnEditProfile(_ sender: AnyObject){
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier:"EditProfileViewController") as! EditProfileViewController
+        
+        controller.first_name   = first_name
+        controller.last_name    = last_name
+        controller.email        = email
+        controller.gender       = gender
+        controller.country      = country
+        controller.image        = imgProfile.image!
+
+        self.navigationController?.pushViewController(controller, animated: true)
+        
+    }
+
+    @IBAction func backBtn(_ sender: AnyObject){
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func btnLogout(_ sender: AnyObject) {
+        
+        showSheet()
+    }
+
+    //MARK: Logout Action Sheet
+    func showSheet () {
+        
+        let actionSheetController: UIAlertController = UIAlertController(title:"Are you sure you ant to logout?", message: nil, preferredStyle: .actionSheet)
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheetController.addAction(cancelActionButton)
+        let logoutActionButton: UIAlertAction = UIAlertAction(title: "Logout", style: .destructive)
+        { action -> Void in
+            
+            UserDefaults.standard.set(false, forKey: "login")
+            fbLoginManager.logOut()
+            FBSDKAccessToken.setCurrent(nil)
+            FBSDKProfile.setCurrent(nil)
+            
+            _ = self.navigationController?.popViewController(animated: true)
+        }
+        actionSheetController.addAction(logoutActionButton)
+        self.present(actionSheetController, animated: true, completion: nil)
+    }
+    
+    //MARK:- TouchDown Action
+    @IBAction func touchDownAction(_ sender: Any) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+    
+    func addBestGames(){
+    
+        let bestGames = UserDefaults.standard.value(forKey: "bestGame")
+        lblBestGame.text = "\(bestGames!)"
+        let gamesPlayed = UserDefaults.standard.value(forKey: "gamePlayed")
+        lblGamesPlayed.text = "\(gamesPlayed!)"
+    }
+}

@@ -1,0 +1,16 @@
+//
+//  InAppPurchaseCell.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class InAppPurchaseCell: UICollectionViewCell {
+    
+    @IBOutlet weak var imgWordPack: UIImageView!
+    @IBOutlet weak var lblWordPack: UILabel!
+    
+}

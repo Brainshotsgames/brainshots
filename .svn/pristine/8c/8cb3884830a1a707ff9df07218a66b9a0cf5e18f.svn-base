@@ -1,0 +1,134 @@
+//
+//  ColorsViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 14/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+
+class ColorsViewController: UIViewController,SessionContainerDelegate,MCBrowserViewControllerDelegate,MCNearbyServiceBrowserDelegate {
+
+    var sessionContainer = SessionContainer()
+    var browser: MCNearbyServiceBrowser!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        //createSession()
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func btnAction(_ sender: AnyObject) {
+        print(sender.tag)
+        switch sender.tag {
+        case 0:
+            browser.startBrowsingForPeers()
+            break
+        case 1:
+            sessionContainer.sendMessage("red")
+            self.view.backgroundColor = UIColor.red
+            break
+        case 2:
+            sessionContainer.sendMessage("green")
+            self.view.backgroundColor = UIColor.green
+            break
+        case 3:
+            sessionContainer.sendMessage("blue")
+            self.view.backgroundColor = UIColor.blue
+            break
+        case 4:
+            sessionContainer.sendMessage("yellow")
+            self.view.backgroundColor = UIColor.yellow
+            break
+        case 5:
+            sessionContainer.sendMessage("black")
+            self.view.backgroundColor = UIColor.black
+            break
+        default:
+            break
+        }
+    }
+    
+    /*MCNearbyServiceBrowser Delegates*/
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?){
+        
+        print(peerID)
+        browser.invitePeer(peerID , to: sessionContainer.session , withContext: nil, timeout: 20)
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID){
+        
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error){
+    }
+    
+    /*Create Session*/
+//    func createSession() {
+//        
+//        let displayName = UIDevice.current.name
+//        // Create the SessionContainer for managing session related functionality.
+//        sessionContainer = SessionContainer.init(displayName: displayName, serviceType: "connect" ,discoveyInfo: nil)
+//        sessionContainer.delegate = self
+//        
+//        print(sessionContainer.session.myPeerID)
+//        
+//        browser = MCNearbyServiceBrowser.init(peer: sessionContainer.session.myPeerID, serviceType: "connect")
+//        browser.delegate = self
+//    }
+    
+    func receivedTranscript(_ transcript:Transcript){
+        
+        DispatchQueue.main.async {
+            
+            print(transcript.message)
+            
+            if(transcript.message == "red"){
+                self.view.backgroundColor = UIColor.red
+            }
+            else if(transcript.message == "green"){
+                self.view.backgroundColor = UIColor.green
+            }
+            else if(transcript.message == "blue"){
+                self.view.backgroundColor = UIColor.blue
+            }
+            else if(transcript.message == "yellow"){
+                self.view.backgroundColor = UIColor.yellow
+            }
+            else if(transcript.message == "black"){
+                self.view.backgroundColor = UIColor.black
+            }
+        }
+    }
+    
+    func update(_ transcript:Transcript){
+        
+        print(transcript.message)
+    }
+
+    /*BrowserViewController Delegates*/
+    func browserViewController(_ browserViewController: MCBrowserViewController, shouldPresentNearbyPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) -> Bool{
+        
+        print(peerID)
+        return true
+    }
+    
+    func browserViewControllerDidFinish(_ browserViewController: MCBrowserViewController){
+        
+        browserViewController.dismiss(animated: true, completion: nil)
+    }
+    
+    func browserViewControllerWasCancelled(_ browserViewController: MCBrowserViewController){
+        
+        browserViewController.dismiss(animated: true, completion: nil)
+    }
+}

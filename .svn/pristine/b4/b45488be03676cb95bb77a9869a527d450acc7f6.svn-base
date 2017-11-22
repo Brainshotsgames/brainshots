@@ -1,0 +1,77 @@
+//
+//  ChooseShotViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+class ChooseShotViewController: UIViewController,SessionContainerDelegate {
+
+    @IBOutlet weak var btnDrinker: UIButton!
+    @IBOutlet weak var btnThinker: UIButton!
+    @IBOutlet weak var btnSinker: UIButton!
+
+    @IBOutlet weak var backViewShot: UIView!
+    @IBOutlet weak var backViewDrinker: UIView!
+    
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        appDelegate.sessionContainer.delegate = self
+        // Do any additional setup after loading the view.
+    }
+    
+    func receivedTranscript(_ transcript: Transcript!) {}
+    func receivedData(_ message: String!, fromPeer peerid: MCPeerID!) {
+    
+        DispatchQueue.main.async {
+            
+            print(message)
+            print(peerid)
+            CommonFunctions.sharedInstance.addPlayers(peer:peerid)
+        }
+    }
+    
+    func update(_ transcript: Transcript!) {}
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Touchup Actions
+    @IBAction func btnDrinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"DrinkerViewController") as! DrinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    @IBAction func btnThinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"ThinkerViewController") as! ThinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+        
+    }
+    
+    @IBAction func btnKitchenSinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"SinkerViewController") as! SinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+        
+    }
+    
+    //MARK:- Back Button
+    @IBAction func btnBack(_ sender: AnyObject) {
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK:- TouchDown Actions Sound
+    @IBAction func touchDown(_ sender: AnyObject) {
+        CommonFunctions.sharedInstance.buttonPressedSound()
+    }
+}

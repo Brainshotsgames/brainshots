@@ -1,0 +1,83 @@
+//
+//  HowToPlay3VC.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 24/01/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class HowToPlay3VC: UIViewController {
+
+    @IBOutlet weak var backView: UIView!
+    @IBOutlet weak var lblText: UILabel!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+        
+        //add attributed string
+        var attributedString = NSMutableAttributedString()
+        attributedString = NSMutableAttributedString(string: Team_Play_Content)
+        
+        //set paragraph style
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = calculatedLineSpacing() //Whatever line spacing you want in points
+        
+        //set font family
+        let font = UIFont(name:kFatFrankRegular, size: setFontSize())
+        
+        // add attributes
+        attributedString.addAttribute(NSFontAttributeName, value: font! ,range:NSMakeRange(0, attributedString.length))
+        attributedString.addAttribute(NSParagraphStyleAttributeName, value:paragraphStyle, range:NSMakeRange(0, attributedString.length))
+        //attributedString.addAttribute(NSForegroundColorAttributeName, value: kYellowColor , range: NSMakeRange(0, attributedString.length))
+        
+        // set label text
+        lblText.attributedText = attributedString;
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    /*Line Spacing for Devices*/
+    func calculatedLineSpacing()->CGFloat {
+        
+        var value = CGFloat()
+        
+        if(DeviceType.IS_IPHONE_5) {
+            value = 5
+        }
+        else if DeviceType.IS_IPHONE_6 || DeviceType.IS_IPHONE_6P {
+            
+            value = 7
+        }
+        return value
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    // Set Font Size
+    func setFontSize()-> CGFloat {
+        
+        var fontSize = CGFloat()
+        
+        if (DeviceType.IS_IPHONE_5) {
+            fontSize = 16.0
+        }
+        else if (DeviceType.IS_IPHONE_6) {
+            fontSize = 19.0
+        }
+        else if (DeviceType.IS_IPHONE_6P) {
+            fontSize = 22.0
+        }
+        else if (DeviceType.IS_IPHONE_4_OR_LESS){
+            fontSize = 14.0
+        }
+        return fontSize
+    }
+}

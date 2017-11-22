@@ -1,0 +1,161 @@
+//
+//  CommonFunctions.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import CoreData
+import AVFoundation
+
+class CommonFunctions: NSObject
+{
+    //MARK: Shared Instance
+    static let sharedInstance : CommonFunctions = {
+        let instance = CommonFunctions()
+        return instance
+    }()
+    
+    // Profile Image
+    var profileImage = UIImage()
+    
+    //SoundManager
+    var player: AVAudioPlayer?
+    
+    var volume: Float?
+    
+    //MARK: Shadow View
+    func setupView(view : UIView) {
+        
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 1.0
+        view.layer.shadowRadius = 1.0
+        view.layer.shadowOffset = CGSize(width: 2, height: 2)
+    }
+    
+    //MARK: Button Borders
+    func setupButtonBorder(vw : AnyObject) {
+        
+        vw.layer.borderWidth = 2
+        vw.layer.borderColor = UIColor.white.cgColor
+    }
+    
+    //MARK: Button Borders + Corner Radius
+    func setupButtonBorderwithRadius(vw : AnyObject) {
+        
+        vw.layer.borderWidth = 2
+        vw.layer.borderColor = UIColor.black.cgColor
+        vw.layer.cornerRadius = 20
+    }
+    
+    //MARK:- Get Current Date
+    func getCurrentDate() -> String {
+        
+        let date = NSDate()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM dd, YYYY"
+        let dateString = dateFormatter.string(from: date as Date)
+        return dateString
+    }
+    
+    //MARK:- IsValid Email
+    func isValidEmail(_ email:String) -> Bool {
+        let emailRegEx = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+        let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        
+        return emailTest.evaluate(with: email)
+    }
+    
+    //MARK:- Center Crop Image
+    func cropToBounds(image: UIImage, width: Double, height: Double) -> UIImage {
+        
+        let contextImage: UIImage = UIImage(cgImage: image.cgImage!)
+        
+        let contextSize: CGSize = contextImage.size
+        
+        var posX: CGFloat = 0.0
+        var posY: CGFloat = 0.0
+        var cgwidth: CGFloat = CGFloat(width)
+        var cgheight: CGFloat = CGFloat(height)
+        
+        // See what size is longer and create the center off of that
+        if contextSize.width > contextSize.height {
+            posX = ((contextSize.width - contextSize.height) / 2)
+            posY = 0
+            cgwidth = contextSize.height
+            cgheight = contextSize.height
+        } else {
+            posX = 0
+            posY = ((contextSize.height - contextSize.width) / 2)
+            cgwidth = contextSize.width
+            cgheight = contextSize.width
+        }
+        
+        let rect: CGRect = CGRect(x:posX, y:posY,width: cgwidth,height: cgheight)
+        
+        // Create bitmap image from context using the rect
+        let imageRef: CGImage = contextImage.cgImage!.cropping(to: rect)!
+        
+        // Create a new image based on the imageRef and rotate back to the original orientation
+        let image: UIImage = UIImage(cgImage: imageRef, scale: image.scale, orientation: image.imageOrientation)
+        
+        return image
+    }
+    
+    //MARK: Button Pressed Sound
+    func buttonPressedSound() {
+        
+        SoundManager.sharedInstance.musicManager(soundName: "BUTTON PRESS CLICK")
+    }
+    
+    func isKeyPresentInUserDefaults(key: String) -> Bool {
+        return UserDefaults.standard.object(forKey: key) != nil
+    }
+    
+    //MARK:- Get Profile Details
+    func getProfileDetails()->(NSMutableDictionary,UIImage) {
+    
+        /*Dictionary to return Profile Details*/
+        let dicDetails = NSMutableDictionary()
+        /*UIImage to return User Profile Image*/
+        var image = UIImage()
+        
+        /*Get Context*/
+        let context = getContext()
+        let entity =  NSEntityDescription.entity(forEntityName: "Profile", in: context)
+        let request: NSFetchRequest<Profile> = Profile.fetchRequest()
+        request.entity = entity
+        
+        do {
+            /*Fetch Profile Details from CoreData*/
+            let fetchResults = try getContext().fetch(request)
+            for trans in fetchResults as [NSManagedObject] {
+                    
+                let first_name :String = trans.value(forKey: "firstName") as! String
+                let last_name  :String     = trans.value(forKey: "lastName") as! String
+                let gender     :String     = trans.value(forKey: "gender") as! String
+                let date       :String     = trans.value(forKey: "date") as! String
+                let country    :String     = trans.value(forKey: "country") as! String
+                let email :String  = trans.value(forKey: "email") as! String
+                let imageData   = trans.value(forKey: "image") as! Data
+
+                dicDetails.setValue(first_name, forKey:"firstName")
+                dicDetails.setValue(last_name, forKey:"lastName")
+                dicDetails.setValue(gender, forKey:"gender")
+                dicDetails.setValue(date, forKey:"date")
+                dicDetails.setValue(country, forKey:"country")
+                dicDetails.setValue(email, forKey:"email")
+                
+                image = UIImage(data: imageData)!
+            }
+            
+        } catch let error as NSError {
+            
+            print(error.localizedDescription)
+        }
+        
+        return (dicDetails,image)
+    }
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>RegularWordPack</key>
+	<array>
+		<string>Sing as many songs as you can with different color words</string>
+		<string>Sing as many songs as you can with different weather words</string>
+		<string>Sing as many songs as you can with girls names</string>
+		<string>Sing as many songs as you can with the words “love” or “hate”</string>
+		<string>Sing as many songs whose titles  start with the letter “P”</string>
+		<string>Sing as many songs as you can with the words “boy” or “girl”</string>
+		<string>Sing as many songs as you can with the words “Winter” or “Summer”</string>
+		<string>Sing as many songs with titles that start with the letter “B”</string>
+		<string>Sing as many different songs as you can in 30 seconds</string>
+		<string>Sing as many Christmas songs as you can</string>
+	</array>
+</dict>
+</plist>

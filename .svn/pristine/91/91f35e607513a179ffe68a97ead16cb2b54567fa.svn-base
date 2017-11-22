@@ -1,0 +1,231 @@
+//
+//  EditProfileViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import CoreData
+
+class EditProfileViewController: UIViewController,UIImagePickerControllerDelegate,UINavigationControllerDelegate {
+    
+    //MARK: - Declare Properties
+    @IBOutlet var vwProfile: UIView!
+    @IBOutlet var imgProfile: UIImageView!
+    @IBOutlet var txtNickName: UITextField!
+    @IBOutlet var txtFirstName: UITextField!
+    @IBOutlet var txtLastName: UITextField!
+    @IBOutlet var txtCountry: UITextField!
+    @IBOutlet weak var genderSegment: UISegmentedControl!
+    @IBOutlet var vwLogin: UIView!
+    @IBOutlet var txtEmail: UITextField!
+    @IBOutlet var txtNewPassword: UITextField!
+    @IBOutlet var txtCnfPassword: UITextField!
+    @IBOutlet var btnCancel: UIButton!
+    @IBOutlet var btnSave: UIButton!
+    
+    // MARK: Variables
+    var first_name = String()
+    var last_name = String()
+    var email = String()
+    var gender = String()
+    var country = String()
+    var image = UIImage()
+    
+    let picker = UIImagePickerController()
+    
+    //MARK:- View Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: vwLogin)
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: vwProfile)
+        CommonFunctions.sharedInstance.setupButtons(button: btnCancel)
+        CommonFunctions.sharedInstance.setupButtons(button: btnSave)
+        picker.delegate = self
+        fillDetails()
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    // MARK:- Fill Details Method
+    func fillDetails() {
+    
+        txtEmail.text = email
+        txtFirstName.text = first_name
+        txtLastName.text = last_name
+        txtCountry.text = country
+        imgProfile.image = image
+    
+        if( gender == "male"){
+            genderSegment.selectedSegmentIndex = 0
+        } else {
+            genderSegment.selectedSegmentIndex = 1
+        }
+    }
+    
+    // Mark: - Button Save Actions
+    @IBAction func btnSave(_ sender: AnyObject) {
+        
+        self.view.endEditing(true)
+        
+        if(txtFirstName.text?.isEmpty == false && txtLastName.text?.isEmpty == false && txtCountry.text?.isEmpty == false && txtEmail.text?.isEmpty == false ) {
+        
+            if(txtEmail.text?.isValidEmail() == true) {
+
+                    gender = checkGender()
+                    ChangeProfileDetailsDB()
+                    showAlertWithAction()
+                
+            }
+            else {
+                showALert("Invalid Email Address.", target: self)
+            }
+        }
+        else {
+            showALert("Fields must not be empty.", target: self)
+        }
+    }
+    
+    //MARK:- Check Gender if Changed
+    func checkGender() -> String {
+    
+        if(genderSegment.selectedSegmentIndex == 0){
+             gender = "male"
+             return gender
+        } else{
+            gender = "female"
+            return gender
+        }
+    }
+    
+    //MARK:- Button Actions
+    @IBAction func btnCancel(_ sender: AnyObject) {
+        
+        _ = navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func btnTermsandConditions(_ sender: AnyObject) {
+        
+    }
+    
+    @IBAction func btnUploadPhoto(_ sender: AnyObject) {
+        
+        showActionSheet()
+        
+    }
+    
+    // MARK:- Show Alert Methods
+    func showALert(_ message:String,target:AnyObject) {
+        
+        let alert = UIAlertController(title: nil , message: message, preferredStyle: UIAlertControllerStyle.alert )
+        let action = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: {Void in})
+        alert.addAction(action)
+        target.present(alert, animated: true, completion: nil)
+    }
+    
+    func showAlertWithAction()  {
+        
+        let alert = UIAlertController(title: nil , message: "Profile save sucessfully.", preferredStyle: UIAlertControllerStyle.alert )
+        let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: { Void in
+            _ = self.navigationController?.popViewController(animated: true)
+        })
+        alert.addAction(okAction)
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    //MARK:- Change Profile Details in DB
+    func ChangeProfileDetailsDB() {
+
+        let data : NSData = UIImagePNGRepresentation(imgProfile.image!)! as NSData
+        let fetchRequest : NSFetchRequest<Profile> = Profile.fetchRequest()
+        do {
+            let searchResults = try getContext().fetch(fetchRequest)
+            for trans in searchResults as [NSManagedObject] {
+                trans.setValue(data, forKey: "image")
+                trans.setValue(txtEmail.text!, forKey: "email")
+                trans.setValue(txtFirstName.text!, forKey: "firstName")
+                trans.setValue(txtLastName.text!, forKey: "lastName")
+                trans.setValue(gender, forKey: "gender")
+                trans.setValue(txtCountry.text!, forKey: "country")
+            }
+        }catch {
+            print("Error with request: \(error)")
+        }
+    }
+    
+    //MARK:- ImagePicker Delegates
+    func imagePickerController(_ picker: UIImagePickerController,didFinishPickingMediaWithInfo info: [String : Any]){
+        
+        let chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage
+        imgProfile.contentMode = .scaleToFill
+        let myThumb1 = CommonFunctions.sharedInstance.cropToBounds(image: chosenImage, width: Double(imgProfile.frame.size.width), height: Double(imgProfile.frame.size.height))
+        imgProfile.image = myThumb1
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        
+        dismiss(animated: true, completion: nil)
+    }
+    
+    // Image Picker Action 
+    func showActionSheet()  {
+        
+        let pickImageOptions = UIAlertController(title: nil, message:nil, preferredStyle: .actionSheet)
+        
+        let saveAction = UIAlertAction(title: "Camera", style: .default, handler: {
+            
+            (alert: UIAlertAction!) -> Void in
+            if UIImagePickerController.availableCaptureModes(for: .rear) != nil {
+                self.picker.allowsEditing = false
+                self.picker.sourceType = UIImagePickerControllerSourceType.camera
+                self.picker.cameraCaptureMode = .photo
+                self.present(self.picker, animated: true, completion: nil)
+            } else {
+                self.noCamera()
+            }
+        })
+        
+        let deleteAction = UIAlertAction(title: "Photo Library", style: .default, handler: {
+            
+            (alert: UIAlertAction!) -> Void in
+            self.picker.allowsEditing = true //2
+            self.picker.sourceType = .photoLibrary //3
+            self.present(self.picker, animated: true, completion: nil)
+        })
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: {
+            (alert: UIAlertAction!) -> Void in
+            
+        })
+        
+        pickImageOptions.addAction(deleteAction)
+        pickImageOptions.addAction(saveAction)
+        pickImageOptions.addAction(cancelAction)
+        self.present(pickImageOptions, animated: true, completion: nil)
+    }
+    
+    func noCamera(){
+        
+        let alertVC = UIAlertController(
+            title: "No Camera",
+            message: "Sorry, this device has no camera",
+            preferredStyle: .alert)
+        let okAction = UIAlertAction(
+            title: "OK",
+            style:.default,
+            handler: nil)
+        alertVC.addAction(okAction)
+        present(
+            alertVC,
+            animated: true,
+            completion: nil)
+    }
+}

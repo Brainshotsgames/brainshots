@@ -1,0 +1,41 @@
+//
+//  TermsConditionsViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 05/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class TermsConditionsViewController: UIViewController {
+
+    //MARK:- SubViews
+    @IBOutlet weak var backView: UIView!
+    
+    //MARK:- Did Load
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Do any additional setup after loading the view.
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Actions
+    //BAck Button
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //TouchDown Action
+    @IBAction func btnBackTouchDown(_ sender: Any) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+    
+}

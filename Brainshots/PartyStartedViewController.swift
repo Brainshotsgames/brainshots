@@ -1,0 +1,56 @@
+//
+//  PartyStartedViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 09/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+import GameKit
+
+class PartyStartedViewController: UIViewController {
+
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        /*Stop Background Sound*/
+        SoundManager.sharedInstance.stopBackgroundSound()
+        
+        /*Save connected peer array for host to access random play*/
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+            fillRandomPlayer()
+        }
+        
+        navigateToSing()
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    func fillRandomPlayer(){
+    
+        var arr = appDelegate.IPSession.session?.connectedPeers
+        arr?.append((appDelegate.IPSession.session?.myPeerID)!)
+        let shuffled : [MCPeerID] = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: arr!) as![MCPeerID]
+        
+        let shuffled2 : [MCPeerID] = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: shuffled) as![MCPeerID]
+        CommonFunctions.sharedInstance.setRandomPlayerArray(array:shuffled2)
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Navigation
+    func navigateToSing(){
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            
+            let controller = self.storyboard?.instantiateViewController(withIdentifier: kSingVC) as! SingViewController
+            self.navigationController?.pushViewController(controller, animated: false)
+        }
+    }
+}

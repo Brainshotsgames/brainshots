@@ -1,0 +1,126 @@
+//
+//  CommonFunctions.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import CoreData
+
+class CommonFunctions: NSObject
+{
+    //MARK: Shared Instance
+    static let sharedInstance : CommonFunctions = {
+        let instance = CommonFunctions()
+        return instance
+    }()
+    
+    // Profile Image
+    var profileImage = UIImage()
+    
+    //MARK: Shadow Buttons
+    func setupButtons(button : UIButton)
+    {
+        button.layer.borderWidth = 2
+        button.layer.borderColor = UIColor.black.cgColor
+        
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 1.0
+        button.layer.shadowRadius = 1.0
+        button.layer.shadowOffset = CGSize(width: 5, height: 5)
+    }
+    
+    //MARK: Button Borders
+    func setupButtonBorder(vw : AnyObject)
+    {
+        vw.layer.borderWidth = 2
+        vw.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    //MARK: Button Borders + Corner Radius
+    func setupButtonBorderwithRadius(vw : AnyObject)
+    {
+        vw.layer.borderWidth = 2
+        vw.layer.borderColor = UIColor.black.cgColor
+        vw.layer.cornerRadius = 20
+    }
+    
+    func getCurrentDate() -> String {
+        
+        let date = NSDate()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM dd, YYYY"
+        let dateString = dateFormatter.string(from: date as Date)
+        return dateString
+    }
+    
+    func isValidEmail(_ email:String) -> Bool {
+        let emailRegEx = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+        let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        
+        return emailTest.evaluate(with: email)
+    }
+    
+    //MARK:- Center Crop Image
+    func cropToBounds(image: UIImage, width: Double, height: Double) -> UIImage {
+        
+        let contextImage: UIImage = UIImage(cgImage: image.cgImage!)
+        
+        let contextSize: CGSize = contextImage.size
+        
+        var posX: CGFloat = 0.0
+        var posY: CGFloat = 0.0
+        var cgwidth: CGFloat = CGFloat(width)
+        var cgheight: CGFloat = CGFloat(height)
+        
+        // See what size is longer and create the center off of that
+        if contextSize.width > contextSize.height {
+            posX = ((contextSize.width - contextSize.height) / 2)
+            posY = 0
+            cgwidth = contextSize.height
+            cgheight = contextSize.height
+        } else {
+            posX = 0
+            posY = ((contextSize.height - contextSize.width) / 2)
+            cgwidth = contextSize.width
+            cgheight = contextSize.width
+        }
+        
+        let rect: CGRect = CGRect(x:posX, y:posY,width: cgwidth,height: cgheight)
+        
+        // Create bitmap image from context using the rect
+        let imageRef: CGImage = contextImage.cgImage!.cropping(to: rect)!
+        
+        // Create a new image based on the imageRef and rotate back to the original orientation
+        let image: UIImage = UIImage(cgImage: imageRef, scale: image.scale, orientation: image.imageOrientation)
+        
+        return image
+    }
+    
+    // Fetch Profile Image
+    func getProfileImage() -> UIImage {
+        
+        let fetchRequest : NSFetchRequest<Profile> = Profile.fetchRequest()
+        do {
+            let searchResults = try getContext().fetch(fetchRequest)
+            
+            for trans in searchResults as [NSManagedObject] {
+                
+                let imageData = trans.value(forKey: "image") as! Data
+                profileImage = UIImage(data: imageData)!
+            }
+        } catch {
+            print("Error with request: \(error)")
+        }
+        
+        return profileImage
+    }
+    
+    func getSavedProfileImage() -> UIImage {
+    
+        return profileImage
+    }
+    
+}

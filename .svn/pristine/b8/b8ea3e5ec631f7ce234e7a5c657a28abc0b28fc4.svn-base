@@ -1,0 +1,42 @@
+//
+//  HowToPlayViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class HowToPlayViewController: UIViewController {
+    
+    //MARK:- Declare Properties
+    @IBOutlet var lblDescription: UILabel!
+    
+    //MARK:- View Did Load
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        //CommonFunctions.sharedInstance.setupButtonBorder(vw: lblDescription)
+        
+        //lblDescription.text = "The game chooses the first player. This player will sing a song with the random word on the screen in one or two lines. If a player successfully sings a song with that word before the 10 seconds are up, that player swipes right for a point and play continues with the next player who uses the same word in a new song. If the time runs out before a song is sung successfully, the player is out of the round and must take their shot. The round is over when everyone has run out of songs to sing. The last player to successfully sing a song is the winner of the round, gets on additional point and does not have to take a shot."
+
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    //MARK:- Button Actions
+    
+    @IBAction func backBtn(_ sender: AnyObject)
+    {
+        _ = navigationController?.popViewController(animated: true)
+    }
+
+    @IBAction func forwardBtn(_ sender: AnyObject) {
+        
+ 
+        
+    }
+}

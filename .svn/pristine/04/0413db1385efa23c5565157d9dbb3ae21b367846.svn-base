@@ -1,0 +1,370 @@
+//
+//  SingViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 09/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+import MultipeerConnectivity
+
+class SingViewController: UIViewController,SessionContainerDelegate {
+    
+    var countPlayer : AVAudioPlayer?
+    @IBOutlet weak var lblTimer: UILabel!
+    @IBOutlet weak var lblPlayer: UILabel!
+    @IBOutlet weak var lblWord: UILabel!
+    
+    var index = NSInteger()
+    
+    var timer = Timer()
+    var count = NSInteger()
+    
+    let swipeGesture = UISwipeGestureRecognizer()
+    
+    override func viewDidLoad() {
+
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+            index = -1
+        }
+        
+        swipeGesture.direction = .right
+        swipeGesture.addTarget(self, action: #selector(swipeAction))
+        
+        super.viewDidLoad()
+        appDelegate.sessionContainer.delegate = self
+        setTurn()
+        // Do any additional setup after loading the view.
+    }
+    
+    func setTurn() {
+    
+        print(CommonFunctions.sharedInstance.connectedPlayers)
+        
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+         
+            if(index == -1) {
+                
+                appDelegate.sessionContainer.sendMessage("HostTurn")
+                lblPlayer.text = "\(appDelegate.sessionContainer.session.myPeerID.displayName) turns"
+                partyStarted(isHost:false)
+                index = 0
+                addGesture()
+            }
+            else {
+                
+                removeGestue()
+                let connectedArray = CommonFunctions.sharedInstance.connectedPlayers
+                
+                if(index < connectedArray.count) {
+                    
+                    var jsonObject = [String: AnyObject]()
+                    
+                    let peerID : MCPeerID?
+                    peerID = connectedArray[index]
+                    print(peerID!)
+                    jsonObject = ["peer_name":peerID?.displayName as AnyObject,"turn":"1" as AnyObject]
+                    do {
+                        let validData  = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
+                        let str : String = String.init(data:validData , encoding: .utf8)!
+                        print(str)
+                        appDelegate.sessionContainer.sendMessage(str, peerId: peerID!)
+                        
+                    }
+                    catch {
+                        print(error)
+                    }
+                    
+                    jsonObject  = [ "peer_name":peerID?.displayName as AnyObject,"turn":"0" as AnyObject]
+                    
+                    do {
+                        let validData  = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
+                        let str : String = String.init(data:validData , encoding: .utf8)!
+                        print(str)
+                        var arr = CommonFunctions.sharedInstance.connectedPlayers
+                        arr.remove(at: index)
+                        print(arr)
+                        if(arr.count > 0){
+                            appDelegate.sessionContainer.sendMessage(str, peerIds: arr)
+                        }
+                    }
+                    catch {
+                        print(error)
+                    }
+                    
+                    self.updateHost(index:index)
+                    
+                    index = index + 1
+                }
+            }
+        }
+    }
+    
+    func updateHost(index:NSInteger){
+    
+        let peerID : MCPeerID?
+        let connectedArray = CommonFunctions.sharedInstance.connectedPlayers
+        peerID = connectedArray[index]
+        
+        self.lblPlayer.text = ""
+        self.lblWord.text = ""
+        self.lblTimer.text = ""
+        
+        lblPlayer.text = "\((peerID?.displayName.capitalized)!)'s turn"
+        
+        self.partyStarted(isHost:false)
+    }
+    
+    //Session Container Delegates
+    func receivedTranscript(_ transcript: Transcript!) {}
+    
+    func receivedData(_ message: String!, fromPeer peerid: MCPeerID!) {
+        
+        print(message)
+        
+        DispatchQueue.main.async {
+            CommonFunctions.sharedInstance.addPlayers(peer:peerid)
+                
+            if(message == "HostTurn") {
+                self.partyStarted(isHost:true)
+            }
+            else if (message == "hostSuccess") {
+                
+                self.lblTimer.text = ""
+                self.lblWord.text = ""
+                self.lblPlayer.text = ""
+                self.timer.invalidate()
+            }
+            else {
+                    
+                let dict : [String: Any] =  self.convertToDictionary(text: message)!
+                print(dict)
+                
+                let player : String = (dict["peer_name"] as! String?)!
+                self.lblPlayer.text = "\(player.capitalized)'s turn"
+                
+                print(self.lblPlayer.text!)
+                
+                if((dict["turn"] as! String?)! == "1"){
+                
+                    self.view.addGestureRecognizer(self.swipeGesture)
+                }
+                else {
+                    self.view.removeGestureRecognizer(self.swipeGesture)
+                }
+                
+                self.partyStarted(isHost:false)
+                
+            }
+        }
+    }
+    
+    
+    func convertToDictionary(text: String) -> [String: Any]? {
+        if let data = text.data(using: .utf8) {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+        return nil
+    }
+    
+    
+    func update(_ transcript: Transcript!) {}
+    
+    func partyStarted(isHost:Bool){
+        
+        /*Add count sound to self*/
+        addCountSound()
+        
+        /*Add Shadow to Views*/
+        CommonFunctions.sharedInstance.setShadowToView(target:lblTimer)
+        CommonFunctions.sharedInstance.setShadowToView(target:lblPlayer)
+        CommonFunctions.sharedInstance.setShadowToView(target:lblWord)
+        
+        if(isHost == true) {
+            
+          var peer : MCPeerID?
+          peer = CommonFunctions.sharedInstance.getHostID()
+          lblPlayer.text = "\((peer?.displayName.capitalized)!) turns"
+        }
+        
+        /*Add counting animation after 0.2 second delay*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
+            
+            self.addCounterAnimation()
+        }
+    }
+    
+    func addGesture(){
+    
+        self.view.addGestureRecognizer(self.swipeGesture)
+    }
+    
+    func removeGestue(){
+    
+        self.view.removeGestureRecognizer(self.swipeGesture)
+    }
+    
+    /*Swipe Left Action*/
+    func swipeAction(){
+    
+        if(count < 10 || count > 0) {
+            
+            if(UserDefaults.standard.bool(forKey: "isHost")) {
+                
+                sendMessageIfSingSuccess()
+                timer.invalidate()
+                
+                let okView : UIView = UIView.init(frame: self.view.frame)
+                self.view.addSubview(okView)
+                
+                let imageView : UIImageView = UIImageView.init(frame:self.view.frame)
+                let image : UIImage = UIImage.init(named: "Round_OpenCurtain_NoMic_BG")!
+                imageView.image = image
+                okView.addSubview(imageView)
+                
+                let imageViewBoy : UIImageView = UIImageView.init(frame:self.view.frame)
+                let imageBoy : UIImage = UIImage.init(named: "boy_ok")!
+                imageViewBoy.image = imageBoy
+                okView.addSubview(imageViewBoy)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3){
+                    
+                    okView.removeFromSuperview()
+                    self.setTurn()
+                }
+            }
+        }
+    }
+    
+    func sendMessageIfSingSuccess(){
+        
+        appDelegate.sessionContainer.sendMessage("hostSuccess")
+    }
+    
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK: Animation
+    /*Start Counting Animation at startup*/
+    func addCounterAnimation(){
+    
+        var imgSinker = UIImage()
+        let showAnimationImgView = UIImageView()
+        showAnimationImgView.frame = self.view.frame
+        self.view.addSubview(showAnimationImgView)
+        
+        var url = NSURL()
+        var data = Data()
+        url = Bundle.main.url(forResource: "Countdown_low", withExtension: "gif")! as NSURL
+        
+        do {
+            data = try Data.init(contentsOf: url as URL)
+        } catch {
+            print(error)
+        }
+        
+        imgSinker = UIImage.animatedImage(withAnimatedGIFData:data)!
+        showAnimationImgView.animationImages = imgSinker.images
+        showAnimationImgView.animationDuration = imgSinker.duration
+        showAnimationImgView.animationRepeatCount = 1
+        showAnimationImgView.image = imgSinker.images?.last
+        showAnimationImgView.startAnimating()
+        
+        /*Play Count Sound after loading count animation*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        
+            self.countPlayer?.prepareToPlay()
+            self.countPlayer?.play()
+        }
+        
+        /*Block to show Popup ( Your Drink is *** )*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            
+            /*Remove timer image animation from self*/
+            showAnimationImgView.removeFromSuperview()
+            
+            /*Popup Random Word*/
+            self.lblWord.text = "Word"
+            CommonFunctions.sharedInstance.setPopupAnimation(target: self.lblWord)
+            
+            /*Start Timer after words appear*/
+            self.count = 10
+            self.startTimer()
+            self.swipeGesture.isEnabled = true
+            
+        }
+    }
+    
+    //MARK: Timer
+    /*Start timer method*/
+    func startTimer() {
+        
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
+        CommonFunctions.sharedInstance.setPopupAnimation(target:lblTimer)
+    }
+    
+    /*Call method to run timer for 10 seconds*/
+    func runTimedCode(){
+        
+        if(count == 0) {
+            
+            timer.invalidate()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            
+                let okView : UIView = UIView.init(frame: self.view.frame)
+                self.view.addSubview(okView)
+                
+                let imageView : UIImageView = UIImageView.init(frame: self.view.frame)
+                let image : UIImage = UIImage.init(named: "Round_OpenCurtain_NoMic_BG")!
+                imageView.image = image
+                okView.addSubview(imageView)
+                
+                let imageViewBoy : UIImageView = UIImageView.init(frame:self.view.frame)
+                let imageBoy : UIImage = UIImage.init(named: "takeyourshot.png")!
+                imageViewBoy.image = imageBoy
+                okView.addSubview(imageViewBoy)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3){
+                    
+                    okView.removeFromSuperview()
+                    self.lblTimer.text = ""
+                    self.lblWord.text = ""
+                   // self.lblPlayer.text = ""
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
+                        self.setTurn()
+                    }
+                    
+                }
+            }
+        }
+        
+        lblTimer.text = "\(count)"
+        count = count - 1
+    }
+    
+    //MARK: Sound
+    /*Add Counting Sound*/
+    func addCountSound(){
+        
+        let url = Bundle.main.url(forResource: "Count", withExtension: "wav")!
+        
+        do {
+            countPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let countPlayer = countPlayer else { return }
+            countPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+}

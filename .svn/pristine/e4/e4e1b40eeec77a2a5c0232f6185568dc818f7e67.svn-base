@@ -1,0 +1,37 @@
+//
+//  ChooseShotViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class ChooseShotViewController: UIViewController {
+
+    @IBOutlet weak var btnDrinker: UIButton!
+    @IBOutlet weak var btnThinker: UIButton!
+    @IBOutlet weak var btnSinker: UIButton!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        CommonFunctions.sharedInstance.setupButtons(button: btnDrinker)
+        CommonFunctions.sharedInstance.setupButtons(button: btnThinker)
+        CommonFunctions.sharedInstance.setupButtons(button: btnSinker)
+
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+}

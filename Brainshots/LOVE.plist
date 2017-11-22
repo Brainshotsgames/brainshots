@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   LOVE.plist
+   Brainshots
+
+   Created by Amritpal Singh on 29/03/17.
+   Copyright (c) 2017 Anuradha Sharma. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>WordPack</key>
+        <array>
+            <string>love</string>
+            <string>like</string>
+            <string>angel</string>
+            <string>friend</string>
+            <string>arms</string>
+            <string>amazing</string>
+            <string>always</string>
+            <string>beautiful</string>
+            <string>because</string>
+            <string>bed</string>
+            <string>belong</string>
+            <string>dear</string>
+            <string>deep</string>
+            <string>dream</string>
+            <string>emotion</string>
+            <string>eyes</string>
+            <string>face</string>
+            <string>true</string>
+            <string>trust</string>
+            <string>write</string>
+            <string>break</string>
+            <string>breathe</string>
+            <string>care</string>
+            <string>chance</string>
+            <string>child</string>
+            <string>goodbye</string>
+            <string>hair</string>
+            <string>happy</string>
+            <string>heart</string>
+            <string>hello</string>
+            <string>honey</string>
+            <string>if</string>
+            <string>joy</string>
+            <string>just</string>
+            <string>laugh</string>
+            <string>lips</string>
+            <string>listen</string>
+            <string>make</string>
+            <string>last</string>
+            <string>boyfriend</string>
+            <string>kind</string>
+            <string>thrill</string>
+            <string>smile</string>
+            <string>simple</string>
+            <string>search</string>
+            <string>romance</string>
+            <string>red</string>
+            <string>pretty</string>
+            <string>pink</string>
+            <string>over</string>
+            <string>only</string>
+            <string>number</string>
+            <string>night</string>
+            <string>next</string>
+            <string>miss</string>
+            <string>mine</string>
+            <string>marry</string>
+            <string>two</string>
+            <string>woman</string>
+            <string>better</string>
+            <string>books</string>
+            <string>hold</string>
+            <string>great</string>
+            <string>ever</string>
+            <string>baby</string>
+        </array>
+        <key>LightningRound</key>
+        <array>
+            <string>Sing as many songs as you can with the words “hello” or “goodbye”</string>
+            <string>Sing as many songs whose titles start with letter “N”</string>
+            <string>Sing as many songs that mention “Mom” or “Dad”</string>
+            <string>Sing as many songs as you can with the words “red” or “pink”</string>
+            <string>Sing as many songs from girl bands as you can</string>
+            <string>Sing as many songs that mention different body parts</string>
+            <string>Sing as many love songs as you can</string>
+            <string>Sing as many songs whose titles start with letter “I”</string>
+            <string>Sing as many songs whose titles start with letter “L”</string>
+            <string>Sing as many sad songs as you can</string>
+            <string>Sing as many songs that mention flowers or types of flowers</string>
+            <string>Sing as many songs as you can that mention sweet treats</string>
+            <string>Sing as many songs as you can with the words “stop” or “go”</string>
+            <string>Sing as many songs as you can that mention days of the week</string>
+            <string>Sing as many kids songs as you can</string>
+        </array>
+    </dict>
+</plist>

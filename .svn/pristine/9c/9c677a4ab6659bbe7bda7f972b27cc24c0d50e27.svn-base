@@ -1,0 +1,394 @@
+//
+//  CommonFunctions.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import CoreData
+import AVFoundation
+import MultipeerConnectivity
+import AVFoundation
+import GameKit
+
+
+class CommonFunctions: NSObject
+{
+    //MARK: Shared Instance
+    static let sharedInstance : CommonFunctions = {
+        let instance = CommonFunctions()
+        return instance
+    }()
+    
+    //MARK:- Shared variables
+    var profileImage = UIImage()
+    var volume: Float?
+    var hostID : MCPeerID?
+    var playersArray =  [MCPeerID]()
+    var shotName = String()
+    var connectedPlayers = [MCPeerID]()
+    var wordPlay = String()
+    var scores = NSInteger()
+    var scoresArray = NSMutableArray()
+    var randomPlayer = [MCPeerID]()
+    var gamePoints = NSInteger()
+    var firstRandomElement : MCPeerID?
+    var allPlayer = NSMutableArray()
+    
+    var randomWordArray = [String]()
+    var randomLightningRoundWord = [String]()
+    
+    //MARK:- Shadow View
+    func setupView(view : UIView) {
+        
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 1.0
+        view.layer.shadowRadius = 1.0
+        view.layer.shadowOffset = CGSize(width: 2, height: 2)
+    }
+    
+    //MARK:- Players connecting while playing the round
+    //Remove Player within gameplay if connection Lost
+    func removePlayer(peer:MCPeerID){
+    
+        if allPlayer.contains(peer){
+            allPlayer.remove(peer)
+        }
+    }
+    
+    func saveFirstRandomPeer(element:MCPeerID){
+        firstRandomElement = element
+    }
+    
+    func getFirstRandomPeer()->MCPeerID {
+        return firstRandomElement!
+    }
+    
+    //MARK:- Button Borders
+    func setupButtonBorder(vw : AnyObject) {
+        
+        vw.layer.borderWidth = 2
+        vw.layer.borderColor = UIColor.white.cgColor
+    }
+    
+    //MARK:- Button Borders + Corner Radius
+    func setupButtonBorderwithRadius(vw : AnyObject) {
+        
+        vw.layer.borderWidth = 2
+        vw.layer.borderColor = UIColor.black.cgColor
+        vw.layer.cornerRadius = 20
+    }
+    
+    //MARK:- Get Current Date
+    func getCurrentDate() -> String {
+        
+        let date = NSDate()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM dd, YYYY"
+        let dateString = dateFormatter.string(from: date as Date)
+        return dateString
+    }
+    
+    //MARK:- IsValid Email
+    func isValidEmail(_ email:String) -> Bool {
+        let emailRegEx = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+        let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        
+        return emailTest.evaluate(with: email)
+    }
+    
+    //MARK:- Center Crop Image
+    func cropToBounds(image: UIImage, width: Double, height: Double) -> UIImage {
+        
+        let contextImage: UIImage = UIImage(cgImage: image.cgImage!)
+        
+        let contextSize: CGSize = contextImage.size
+        
+        var posX: CGFloat = 0.0
+        var posY: CGFloat = 0.0
+        var cgwidth: CGFloat = CGFloat(width)
+        var cgheight: CGFloat = CGFloat(height)
+        
+        // See what size is longer and create the center off of that
+        if contextSize.width > contextSize.height {
+            posX = ((contextSize.width - contextSize.height) / 2)
+            posY = 0
+            cgwidth = contextSize.height
+            cgheight = contextSize.height
+        } else {
+            posX = 0
+            posY = ((contextSize.height - contextSize.width) / 2)
+            cgwidth = contextSize.width
+            cgheight = contextSize.width
+        }
+        
+        let rect: CGRect = CGRect(x:posX, y:posY,width: cgwidth,height: cgheight)
+        
+        // Create bitmap image from context using the rect
+        let imageRef: CGImage = contextImage.cgImage!.cropping(to: rect)!
+        
+        // Create a new image based on the imageRef and rotate back to the original orientation
+        let image: UIImage = UIImage(cgImage: imageRef, scale: image.scale, orientation: image.imageOrientation)
+        
+        return image
+    }
+    
+    func isKeyPresentInUserDefaults(key: String) -> Bool {
+        return UserDefaults.standard.object(forKey: key) != nil
+    }
+    
+    //MARK:- Get Profile Details
+    func getProfileDetails()->NSMutableDictionary {
+    
+        /*Dictionary to return Profile Details*/
+        let dicDetails = NSMutableDictionary()
+        /*UIImage to return User Profile Image*/
+        var image = UIImage()
+        
+        /*Get Context*/
+        let context = getContext()
+        let entity =  NSEntityDescription.entity(forEntityName: "Profile", in: context)
+        let request: NSFetchRequest<Profile> = Profile.fetchRequest()
+        request.entity = entity
+        
+        do {
+            /*Fetch Profile Details from CoreData*/
+            let fetchResults = try getContext().fetch(request)
+            for trans in fetchResults as [NSManagedObject] {
+                    
+                let first_name :String = trans.value(forKey: "firstName") as! String
+                let last_name  :String     = trans.value(forKey: "lastName") as! String
+                let gender     :String     = trans.value(forKey: "gender") as! String
+                let date       :String     = trans.value(forKey: "date") as! String
+                let country    :String     = trans.value(forKey: "country") as! String
+                let email :String  = trans.value(forKey: "email") as! String
+                let imageData   = trans.value(forKey: "image") as! Data
+
+                dicDetails.setValue(first_name, forKey:"firstName")
+                dicDetails.setValue(last_name, forKey:"lastName")
+                dicDetails.setValue(gender, forKey:"gender")
+                dicDetails.setValue(date, forKey:"date")
+                dicDetails.setValue(country, forKey:"country")
+                dicDetails.setValue(email, forKey:"email")
+                
+                image = UIImage(data: imageData)!
+            }
+            
+        } catch let error as NSError {
+            
+            print(error.localizedDescription)
+        }
+        
+        return dicDetails
+    }
+    
+    //MARK:- Pop Animation
+    func setPopupAnimation(target:UIView){
+        
+        target.transform = CGAffineTransform.init(scaleX:  0.001, y: 0.001)
+        
+        UIView.animate(withDuration: 0.3/1.5, animations: {
+            target.transform = CGAffineTransform.init(scaleX:  1.1, y: 1.1)
+        }, completion:{ (true) in
+            UIView.animate(withDuration: 0.3/2, animations: {
+                target.transform = CGAffineTransform.init(scaleX: 0.9, y: 0.9)
+            }, completion:{ (true) in
+                UIView.animate(withDuration: 0.3/2, animations: {
+                    target.transform = .identity
+                })
+            })
+        })
+    }
+    
+    //MARK:- Shadow
+    func setShadowToView(target:UIView){
+    
+        target.layer.shadowColor = UIColor.black.cgColor
+        target.layer.shadowOpacity = 1
+        target.layer.shadowRadius = 5
+        target.layer.shadowOffset = CGSize(width: 0, height: 0)
+    }
+    
+    //MARK:- Host
+    /*Set Host ID */
+    func setHostID(peerID:MCPeerID){
+    
+        hostID = peerID
+    }
+    
+    /*Get Host ID*/
+    func getHostID() -> MCPeerID {
+    
+        return hostID!
+    }
+    
+    //MARK:- Add Players
+    /*Add players to host*/
+    func addPlayers(peer:MCPeerID) {
+    
+        playersArray.append(peer)
+    }
+    
+    func removePlayers(peer:MCPeerID) {
+    
+        if let index = playersArray.index(of: peer) {
+            playersArray.remove(at: index)
+        }
+    }
+    
+    //MARK:- Random Word
+    /*Save word to be play*/
+    func setWordPlay(word:String) {
+        
+        UserDefaults.standard.set(word, forKey: "wordPlay")
+    }
+    
+    /*Get word to be play*/
+    func getWordPlay() -> String {
+    
+        return UserDefaults.standard.value(forKey: "wordPlay") as! String
+    }
+    
+    /*Save scores*/
+    func setScores(score:NSInteger){
+    
+        scores = score
+    }
+    
+    //MARK:- Scores Config
+    /*Get scores*/
+    func getScores()->NSInteger {
+    
+        return scores
+    }
+    
+    /*Store players scores array*/
+    func setScoresArray(array:NSMutableArray) {
+        scoresArray = array
+    }
+    
+    /*Get Players Score Array*/
+    func getPlayersScore()-> NSMutableArray {
+    
+        return scoresArray
+    }
+    
+    /*Remove players stats if connection lost*/
+    func removePlayersScoreStats(peer:MCPeerID) {
+
+        let displayName = peer.displayName
+        var displayArray = [String]()
+        
+        if(scoresArray.count > 0) {
+            for i in 0...scoresArray.count-1 {
+                
+                let dict : [String: Any] = scoresArray[i] as! [String : Any]
+                let name = dict["peerName"] as! String
+                displayArray.append(name)
+            }
+        }
+
+        if(displayArray.contains(displayName)){
+        
+            let index = displayArray.index(of: displayName)
+            scoresArray.removeObject(at: index!)
+        }
+    }
+    
+    //MARK:- Random Player Config for Lightning Round
+    func setRandomPlayerArray(array:[MCPeerID]){
+    
+        randomPlayer = array
+    }
+    
+    func getRandomPlayer()-> [MCPeerID] {
+        
+        return randomPlayer
+    }
+    
+    func removeRandomPlayer(peer:MCPeerID){
+        
+        if randomPlayer.contains(peer){
+        
+            let index : NSInteger = randomPlayer.index(of: peer)!
+            randomPlayer.remove(at:index)
+        }
+    }
+    
+    //MARK:- WordPack Array
+    func setWordArray(){
+        
+        let dictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "WordPack", ofType: "plist")!);
+        let array : Array<String> = dictionary?["RegularWordPack"] as! Array
+        let shuffelarray : [String] = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: array) as! [String]
+        randomWordArray = shuffelarray
+    }
+    
+    func getWordArray()-> Array<String> {
+        
+        return randomWordArray
+    }
+    
+    func removeWordFromArray(element:String){
+    
+        if(randomWordArray.contains(element)){
+        
+            let index = randomWordArray.index(of: element)
+            randomWordArray.remove(at: index!)
+            
+            if(randomWordArray.count == 0){
+                setWordArray()
+            }
+        }
+    }
+    
+    //MARK:- Lightning Round WordPack
+    func setLightningRoundWordArray(){
+        
+        let dictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "LightningRound", ofType: "plist")!);
+        let array : Array<String> = dictionary?["RegularWordPack"] as! Array
+        let shuffelarray : [String] = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: array) as! [String]
+        randomLightningRoundWord = shuffelarray
+    }
+    
+    func getLightningRoundWordArray()-> Array<String> {
+        
+        return randomLightningRoundWord
+    }
+    
+    func removeLightningRoundWord(element:String){
+        
+        if(randomLightningRoundWord.contains(element)){
+            
+            let index = randomLightningRoundWord.index(of: element)
+            randomLightningRoundWord.remove(at: index!)
+            
+            if(randomLightningRoundWord.count == 0){
+                setLightningRoundWordArray()
+            }
+        }
+    }
+    
+    //MARK:- Game Points Config
+    func setGamePoints(points:NSInteger){
+        
+        gamePoints = points
+    }
+    
+    func getGamePoints()-> NSInteger {
+        
+        return gamePoints
+    }
+    
+    //MARK:- Sorting Array
+    func sortDiscriptor(arrayToBeSort:NSArray) -> NSArray {
+        
+        let scoreDiscriptor = NSSortDescriptor.init(key: "score", ascending: false)
+        let sortDiscriptor = NSArray(object:scoreDiscriptor)
+        let tempArray = arrayToBeSort.sortedArray(using:sortDiscriptor as! [NSSortDescriptor])
+        let sortedArray  = NSArray.init(array: tempArray)
+        return sortedArray
+    }
+}

@@ -1,0 +1,60 @@
+//
+//  DrinkerViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class DrinkerViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+    
+    @IBOutlet weak var lblTitle: UILabel!
+    @IBOutlet weak var tableView: UITableView!
+    var shotsArray = NSArray()
+
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        shotsArray = ["BEER","VODKA","TEQUILA","RED WINE","WHITE WINE","COOLERS","RUM","GIN","SCOTCH","OTHER"]
+        tableView.separatorColor = UIColor.clear
+
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return shotsArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "Cell"
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
+        let shotsName : String = "\(String(indexPath.row + 1)). \(String(describing: shotsArray.object(at: indexPath.row)))"
+        cell.textLabel?.text = shotsName
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 18)
+        cell.textLabel?.textColor = UIColor.blue
+        
+        cell.selectionStyle = UITableViewCellSelectionStyle.none
+        
+        return cell
+        
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 40
+    }
+    
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+}

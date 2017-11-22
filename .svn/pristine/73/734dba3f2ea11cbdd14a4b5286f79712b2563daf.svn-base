@@ -1,0 +1,17 @@
+//
+//  BrainShots-Bridging-Header.h
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+#ifndef BrainShots_Bridging_Header_h
+#define BrainShots_Bridging_Header_h
+
+#import "FLAnimatedImage.h"
+#import "FLAnimatedImageView.h"
+#import "UIImage+animatedGIF.h"
+#import "AudioToolbox/AudioToolbox.h"
+
+#endif /* BrainShots_Bridging_Header_h */

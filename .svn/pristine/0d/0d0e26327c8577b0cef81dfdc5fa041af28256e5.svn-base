@@ -1,0 +1,134 @@
+//
+//  TestViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 06/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class TestViewController: UIViewController {
+
+    /*WordPack Images*/
+    @IBOutlet weak var imgWordPack1: UIImageView!
+    @IBOutlet weak var imgWordPack2: UIImageView!
+    @IBOutlet weak var imgWordPack3: UIImageView!
+    @IBOutlet weak var imgWordPack4: UIImageView!
+    @IBOutlet weak var imgWordPack5: UIImageView!
+    
+    /*WordPack Image Gestures*/
+    let tapPack1 = UITapGestureRecognizer()
+    let tapPack2 = UITapGestureRecognizer()
+    let tapPack3 = UITapGestureRecognizer()
+    let tapPack4 = UITapGestureRecognizer()
+    let tapPack5 = UITapGestureRecognizer()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    /*Wordpack1 Action*/
+    @IBAction func wordPack1(_ sender: Any) {
+        
+        animateImage(tagValue:1,image:imgWordPack1)
+    }
+    
+    /*Wordpack2 Action*/
+    @IBAction func wordPack2(_ sender: Any) {
+    
+         animateImage(tagValue:2,image:imgWordPack2)
+    }
+    
+    /*Wordpack3 Action*/
+    @IBAction func wordPack3(_ sender: Any) {
+        
+        
+        animateImage(tagValue:3,image:imgWordPack3)
+    }
+    
+    /*Wordpack4 Action*/
+    @IBAction func wordPack4(_ sender: Any) {
+        
+        animateImage(tagValue:4,image:imgWordPack4)
+    }
+    
+    /*Wordpack5 Action*/
+    @IBAction func wordPack5(_ sender: Any) {
+        
+        animateImage(tagValue:5,image:imgWordPack5)
+    }
+   
+    /*Method for animating Wordpack Image*/
+    func animateImage(tagValue:NSInteger,image:UIImageView){
+    
+        self.view.isUserInteractionEnabled = false
+        
+        let originalFrame = getFrame(tagValue: tagValue)
+        self.view.bringSubview(toFront: image)
+        self.view.layoutSubviews()
+        
+        /*Animate Image*/
+        UIView.animate(withDuration: 0.2, animations: {
+            
+                image.frame = self.view.frame
+            
+        }) { (true) in
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                
+                UIView.animate(withDuration: 0.2, animations: {
+                    
+                    image.frame = originalFrame
+                    self.view.isUserInteractionEnabled = true
+                    
+                })
+            }
+        }
+    }
+    
+    /*Return frames for wordpack image*/
+    func getFrame(tagValue:NSInteger)->CGRect{
+        
+        var frameValue = CGRect(x: 0, y: 0, width: 0, height: 0)
+        
+        switch tagValue {
+        case 1:
+            frameValue = imgWordPack1.frame
+            break
+        case 2:
+            frameValue = imgWordPack2.frame
+            break
+        case 3:
+            frameValue = imgWordPack3.frame
+            break
+        case 4:
+            frameValue = imgWordPack4.frame
+            break
+        case 5:
+            frameValue = imgWordPack5.frame
+            break
+        default:
+            frameValue = imgWordPack1.frame
+            break
+        }
+        
+        return frameValue
+    }
+    
+    /*Button Back Action*/
+    @IBAction func btnback(_ sender: Any) {
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    /*TouchDown Action*/
+    @IBAction func touchDown(_ sender: Any) {
+        CommonFunctions.sharedInstance.buttonPressedSound()
+    }  
+}

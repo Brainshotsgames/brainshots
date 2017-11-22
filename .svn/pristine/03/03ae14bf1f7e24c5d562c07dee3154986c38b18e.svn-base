@@ -1,0 +1,127 @@
+//
+//  ChooseShotViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+class ChooseShotViewController: UIViewController,IPSessionDelegate {
+
+    //MARK:- Outlets
+    @IBOutlet weak var btnDrinker: UIButton!
+    @IBOutlet weak var btnThinker: UIButton!
+    @IBOutlet weak var btnSinker: UIButton!
+    @IBOutlet weak var backViewShot: UIView!
+    @IBOutlet weak var backViewDrinker: UIView!
+    
+    //MARK:- Variables
+    var timer = Timer()
+    
+    //MARK:- Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        /*initialize IP session delegate to self*/
+        appDelegate.IPSession.delegate = self
+        
+        /*set game starts boolean*/
+        UserDefaults.standard.set(true, forKey: "GameStarts")
+        
+        /*Set connection lost notification*/
+        NotificationCenter.default.addObserver(self, selector: #selector(checkIfPlayerLostConnection), name: NSNotification.Name(rawValue: "connectionLost"), object: nil)
+        
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Notification Selector
+    /*Regular Check for Lost Connection*/
+    func checkIfPlayerLostConnection(){
+    
+        DispatchQueue.main.async {
+            self.showAlert()
+        }
+    }
+    
+    //MARK:- Alert
+    /*Show Alert if connection losts*/
+    func showAlert() {
+        
+        let controller = UIAlertController.init(title: kConnectionLost, message:kStartAgain, preferredStyle: .alert)
+        
+        let okAction = UIAlertAction.init(title: "OK", style: .default) { (action:UIAlertAction!) in
+            
+            let array = self.navigationController?.viewControllers
+            
+            for obj in array! {
+                print(obj)
+                if obj.isKind(of: IndividualPlayViewController.self)  {
+                    _ =  self.navigationController?.popToViewController(obj, animated: false)
+                    NotificationCenter.default.removeObserver(self, name:NSNotification.Name(rawValue: "connectionLost"), object: nil)
+                }
+            }
+        }
+        
+        controller.addAction(okAction)
+        present(controller, animated: true, completion: nil)
+    }
+
+    //MARK:- Session Delegate
+    /*IPSession Delegate*/
+    func receiveMessage(message: String, from peerid: MCPeerID) {
+        
+        DispatchQueue.main.async {
+            CommonFunctions.sharedInstance.addPlayers(peer:peerid)
+        }
+    }
+    
+    //MARK:- Actions
+    //Drinker Action
+    @IBAction func btnDrinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:kDrinkerVC) as! DrinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    //Thinker Action
+    @IBAction func btnThinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:kThinkerVC) as! ThinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    //Kitchen Sinker Action
+    @IBAction func btnKitchenSinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:kSinkerVC) as! SinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    //BAck Button Action
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        NotificationCenter.default.removeObserver(self, name:NSNotification.Name(rawValue: "connectionLost"), object: nil)
+        
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+            appDelegate.IPSession.advertiserAssistant?.startAdvertisingPeer()
+        }
+        else{
+            appDelegate.IPSession.session?.disconnect()
+        }
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //TouchDown Action
+    @IBAction func touchDown(_ sender: AnyObject) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+}

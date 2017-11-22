@@ -1,0 +1,60 @@
+//
+//  HostViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 20/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+class HostViewController: UIViewController,UITextFieldDelegate {
+
+    @IBOutlet weak var txtHostName: UITextField!
+    //var  sessionContainer = SessionContainer()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        txtHostName.delegate = self
+        UserDefaults.standard.set(false, forKey: "isInvited")
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    func startAdvertise() {
+        
+        // Create the SessionContainer for managing session related functionality.
+        appDelegate.sessionContainer = SessionContainer.init(displayName: txtHostName.text, serviceType: "connect" ,discoveyInfo: nil, ifAdvertise:true)
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    @IBAction func btnNext(_ sender: Any) {
+        
+        if(!((txtHostName.text?.isEmpty)!)){
+        
+            startAdvertise()
+            CommonFunctions.sharedInstance.setHostID(peerID:appDelegate.sessionContainer.session.myPeerID)
+            UserDefaults.standard.set(true, forKey: "isHost")
+            let controller = self.storyboard?.instantiateViewController(withIdentifier: "ConnectedPlayersViewController") as! ConnectedPlayersViewController
+            self.navigationController?.pushViewController(controller, animated: true)
+        }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        txtHostName.resignFirstResponder()
+        return true
+    }
+    
+    @IBAction func btnBack(_ sender: Any) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+}

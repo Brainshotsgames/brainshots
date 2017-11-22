@@ -1,0 +1,136 @@
+//
+//  LaunchViewController.swift
+//  Brainshots
+//
+//  Created by softprodigy on 28/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class LaunchViewController: UIViewController {
+
+    fileprivate var rootViewController: UIViewController? = nil
+    @IBOutlet weak var imgPour: UIImageView!
+    @IBOutlet var imgCurtains: FLAnimatedImageView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+       // showLasunchViewController()
+        // Do any additional setup after loading the view.
+        
+        var images =  [UIImage]()
+        
+        for i in 1...10 {
+            let imgName = String("Pour_\(i).png")
+            let img = UIImage(named:imgName!)
+            images.append(img!)
+        }
+        
+        print(images)
+        imgPour.animationImages = images
+        imgPour.animationDuration = 0.5
+        imgPour.startAnimating()
+        
+        perform(#selector(LaunchViewController.showCurtainVC), with: nil, afterDelay: 4.5)
+        
+    }
+    
+    func showCurtainVC() {
+    
+         self.appDelegate.closeCurtains(isOpen:true)
+         perform(#selector(navigateToNextVC), with: nil, afterDelay: 1)
+        
+    }
+    
+    func navigateToNextVC() {
+    
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func showSplashViewController() {
+        
+        rootViewController?.willMove(toParentViewController: nil)
+        rootViewController?.removeFromParentViewController()
+        rootViewController?.view.removeFromSuperview()
+        rootViewController?.didMove(toParentViewController: nil)
+        
+        let splashViewController = SplashViewController()
+        rootViewController = splashViewController
+        //splashViewController.pulsing = true
+        
+        splashViewController.willMove(toParentViewController: self)
+        addChildViewController(splashViewController)
+        view.addSubview(splashViewController.view)
+        splashViewController.didMove(toParentViewController: self)
+    }
+
+    /// Simulates an API handshake success and transitions to RootUIViewController
+    func showLasunchViewController() {
+        showSplashViewController()
+        delay(5.3) {
+            self.showRootViewController()
+        }
+    }
+    
+    //MARK:- Show Curtains Falling
+    func showCurtains() {
+        
+//        self.view.sendSubview(toBack: imgPour)
+//        self.view.bringSubview(toFront: imgCurtains)
+        let url1 : NSURL = Bundle.main.url(forResource: "Curtains_Close", withExtension: "gif")! as NSURL
+        let data1 = NSData(contentsOf: url1 as URL)
+        let animatedImage = FLAnimatedImage(gifData: data1 as Data!)
+        animatedImage?.loopCount = 1
+        imgCurtains.animatedImage = animatedImage
+        
+//        if(!imgCurtains.isAnimating) {
+//        
+//            imgCurtains.isHidden = true
+//        }
+    }
+    
+    // MARK: - Show root view controller
+    
+    func showRootViewController()  {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let nav =  storyboard.instantiateViewController(withIdentifier: "NavigationController") as! UINavigationController
+        nav.willMove(toParentViewController: self)
+        addChildViewController(nav)
+        
+        if let rootViewController = self.rootViewController {
+            self.rootViewController = nav
+            rootViewController.willMove(toParentViewController: nil)
+            
+            transition(from: rootViewController, to: nav, duration: 0.0, options: [.transitionCrossDissolve, .curveEaseOut], animations: { () -> Void in
+                
+            }, completion: { _ in
+                nav.didMove(toParentViewController: self)
+                rootViewController.removeFromParentViewController()
+                rootViewController.didMove(toParentViewController: nil)
+            })
+        } else {
+            rootViewController = nav
+            view.addSubview(nav.view)
+            nav.didMove(toParentViewController: self)
+        }
+    }
+    
+    /*
+    // MARK: - Navigation
+
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destinationViewController.
+        // Pass the selected object to the new view controller.
+    }
+    */
+
+}

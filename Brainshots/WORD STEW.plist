@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   WORD STEW.plist
+   Brainshots
+
+   Created by Amritpal Singh on 29/03/17.
+   Copyright (c) 2017 Anuradha Sharma. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>WordPack</key>
+        <array>
+            <string>stand</string>
+            <string>remember</string>
+            <string>dress</string>
+            <string>thing</string>
+            <string>me</string>
+            <string>big</string>
+            <string>bottom</string>
+            <string>place</string>
+            <string>plane</string>
+            <string>birthday</string>
+            <string>boat</string>
+            <string>disco</string>
+            <string>father</string>
+            <string>fell</string>
+            <string>first</string>
+            <string>candy</string>
+            <string>Christmas</string>
+            <string>gone</string>
+            <string>he</string>
+            <string>head</string>
+            <string>here</string>
+            <string>in</string>
+            <string>it</string>
+            <string>king</string>
+            <string>left</string>
+            <string>look</string>
+            <string>moment</string>
+            <string>mother</string>
+            <string>need</string>
+            <string>not</string>
+            <string>on</string>
+            <string>open</string>
+            <string>New York</string>
+            <string>phone</string>
+            <string>pop</string>
+            <string>room</string>
+            <string>alone</string>
+            <string>Saturday</string>
+            <string>sleep</string>
+            <string>still</string>
+            <string>stuck</string>
+            <string>surf</string>
+            <string>tears</string>
+            <string>tell</string>
+            <string>this</string>
+            <string>teach</string>
+            <string>together</string>
+            <string>train</string>
+            <string>turn</string>
+            <string>USA</string>
+            <string>watch</string>
+            <string>wave</string>
+            <string>we</string>
+            <string>what</string>
+            <string>will</string>
+            <string>window</string>
+            <string>winter</string>
+            <string>fight</string>
+            <string>fever</string>
+            <string>words</string>
+            <string>free</string>
+            <string>pain </string>
+            <string>town</string>
+            <string>going</string>
+            <string>like</string>
+        </array>
+        <key>LightningRound</key>
+        <array>
+            <string>Sing as many songs as you can with the words “he” or “she”</string>
+            <string>Sing as many Broadway songs as you can </string>
+            <string>Sing as many songs whose titles start with letter “L”</string>
+            <string>Sing as many songs that have different shape words</string>
+            <string>Sing as many songs as you can with the words “you” or “I”</string>
+            <string>Sing as many holiday songs as you can</string>
+            <string>Sing as many songs whose titles start with letter “T”</string>
+            <string>Sing as many songs as you can that mention different months</string>
+            <string>Sing as many disco songs as you can</string>
+            <string>Sing as many songs as you can with the words “moon” or “stars”</string>
+            <string>Sing as many songs as you can with the words “good” or” bad”</string>
+            <string>Sing as many songs that mention a part of a house</string>
+            <string>Sing as many songs whose titles start with letter “O”</string>
+            <string>Sing as many songs that contain a girls or boys name</string>
+            <string>Sing as many Motown songs as you can</string>
+        </array>
+    </dict>
+</plist>

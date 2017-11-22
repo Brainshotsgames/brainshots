@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WordPack</key>
+	<array>
+		<string>be</string>
+		<string>Monday</string>
+		<string>New York</string>
+		<string>please</string>
+		<string>sad</string>
+		<string>she</string>
+		<string>stay</string>
+		<string>twist</string>
+		<string>bird</string>
+		<string>can</string>
+		<string>had</string>
+		<string>hand</string>
+		<string>hate</string>
+		<string>help</string>
+		<string>late</string>
+		<string>more</string>
+		<string>come</string>
+		<string>saw</string>
+		<string>try</string>
+		<string>home</string>
+		<string>good</string>
+		<string>man</string>
+		<string>car</string>
+		<string>song</string>
+		<string>boy</string>
+		<string>down</string>
+		<string>dance</string>
+		<string>party</string>
+		<string>baby</string>
+		<string>love</string>
+		<string>friend</string>
+		<string>lonely</string>
+		<string>girl</string>
+		<string>one</string>
+		<string>boogie</string>
+		<string>who</string>
+		<string>face</string>
+		<string>time</string>
+		<string>tonight</string>
+		<string>shout</string>
+		<string>black</string>
+		<string>name </string>
+		<string>blue</string>
+		<string>moon</string>
+		<string>city</string>
+		<string>cold</string>
+		<string>heaven</string>
+		<string>smile</string>
+		<string>happy </string>
+		<string>heart </string>
+	</array>
+	<key>LightningRound</key>
+	<array>
+		<string>Sing as many songs as you can with different color words</string>
+		<string>Sing as many songs as you can with different weather words</string>
+		<string>Sing as many songs as you can with girls names</string>
+		<string>Sing as many songs as you can with the words “love” or “hate”</string>
+		<string>Sing as many songs whose titles  start with the letter “P”</string>
+		<string>Sing as many songs as you can with the words “boy” or “girl”</string>
+		<string>Sing as many songs as you can with the words “Winter” or “Summer”</string>
+		<string>Sing as many songs with titles that start with the letter “B”</string>
+		<string>Sing as many different songs as you can in 30 seconds</string>
+		<string>Sing as many Christmas songs as you can</string>
+	</array>
+</dict>
+</plist>

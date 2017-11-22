@@ -1,0 +1,282 @@
+//
+//  JoinHostViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 20/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+import MBProgressHUD
+
+
+class JoinHostViewController: UIViewController,MCNearbyServiceBrowserDelegate,UITableViewDataSource,UITableViewDelegate,IPSessionDelegate{
+
+    //MARK:- Outlets
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var lblMsg: UILabel!
+    
+    //MARK:- Variables
+    var browser: MCNearbyServiceBrowser!
+    var hostName = NSMutableArray()
+    var displayName = String()
+   
+    //MARK:- Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        super.viewWillAppear(animated)
+        hostName.removeAllObjects()
+        tableView.reloadData()
+        lblMsg.isHidden = true
+        showProgressHud(text: "Searching Host")
+        perform(#selector(createIPSessionWithHost), with: nil, afterDelay: 0.5)
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Add Progress
+    /*Add Customize Progress View with Message*/
+    func showProgressHud(text:String){
+        
+        let progress = MBProgressHUD.showAdded(to: tableView, animated: true)
+        progress.bezelView.color = .white
+        progress.activityIndicatorColor = kBaseRed
+        progress.animationType = .zoomIn
+        progress.label.font = UIFont.init(name: kFatFrankRegular, size: 20)
+        progress.label.text = text
+        progress.label.textColor = kBaseRed
+    }
+    
+    //MARK:- Session
+    /*Create Session*/
+    func createIPSessionWithHost(){
+
+        //Setup display name
+        displayName = getPlayerName()
+        
+        //Create the Session for managing session related functionality.
+        appDelegate.IPSession = IndividualSession.init(displayName: displayName, serviceType: "connect", ifAdvertise: false)
+        appDelegate.IPSession.delegate = self
+        browser = MCNearbyServiceBrowser.init(peer:(appDelegate.IPSession.session?.myPeerID)!, serviceType: "connect")
+        browser.delegate = self
+        browser.startBrowsingForPeers()
+    }
+    
+    //MARK:- Fetch Player Name
+    func getPlayerName()-> String {
+    
+        var name = String()
+        
+        if UserDefaults.standard.bool(forKey: "login") {
+            
+            let dict : NSMutableDictionary =  CommonFunctions.sharedInstance.getProfileDetails()
+            name  = (dict.value(forKey: "firstName") as! String?)!
+        }
+        else {
+            name = UIDevice.current.name
+        }
+        
+        return name
+    }
+    
+    //MARK:- UITableview Delegates & Data Source
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return hostName.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "cellid"
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
+
+        var peerId : MCPeerID?
+        peerId = hostName.object(at: indexPath.row) as? MCPeerID
+        let hostNameStr : String = "\(peerId!.displayName)"
+        cell.selectionStyle = .none
+        cell.textLabel?.text = hostNameStr.capitalized
+        cell.textLabel?.font = UIFont.init(name: kFatFrankRegular, size: 32);
+        cell.textLabel?.textColor = UIColor.white
+        cell.textLabel?.textAlignment = .center
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 50
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        var peerId : MCPeerID?
+        peerId = hostName.object(at: indexPath.row) as? MCPeerID
+        browser.invitePeer(peerId! , to:(appDelegate.IPSession.session)! , withContext: nil, timeout: 20)
+        UserDefaults.standard.set(false, forKey: "isHost")
+        CommonFunctions.sharedInstance.setHostID(peerID:peerId!)
+        
+        /*Add Progress View*/
+        showProgressHud(text: "Connecting")
+        
+        /*Add Observer for checking connectivity*/
+        NotificationCenter.default.addObserver(self, selector: #selector(setConnectionWithHost), name: NSNotification.Name(rawValue: "connectingHost"), object: nil)
+    }
+    
+    //MARK:- Connection Monitoring
+    /*Checking connection with Host*/
+    func setConnectionWithHost(notification:Notification) {
+        
+        DispatchQueue.main.async {
+        
+            MBProgressHUD.hide(for: self.tableView, animated: true)
+            
+            /*Remove observer*/
+            NotificationCenter.default.removeObserver(self, name:NSNotification.Name(rawValue: "connectingHost"), object: nil)
+            
+            /*Store user info of notification*/
+            let dict : [String:Any] = notification.userInfo as! [String:Any]
+            let status : String = dict["status"] as! String
+            
+            /*Check for connection*/
+            if status == "connected" {
+                
+                print(appDelegate.IPSession.session?.connectedPeers ?? "nil")
+            }
+            else if status == "not-connected" {
+                
+                self.showNotConnectedAlert()
+            }
+        }
+    }
+    
+    //MARK:- Navigation
+    /*Navigation to Shots Page*/
+    func navigateToSelectPlay() {
+        
+        browser.delegate = nil
+        browser.stopBrowsingForPeers()
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "ChooseShotViewController") as! ChooseShotViewController
+        self.navigationController?.pushViewController(controller, animated: true)
+        
+    }
+    
+    //MARK:- Browser Delegates
+    /*MCNearbyServiceBrowser Delegates*/
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        
+        print(peerID)
+        
+        if(!(hostName.contains(peerID))){
+            hostName.add(peerID)
+            tableView.reloadData()
+            lblMsg.isHidden = false
+            MBProgressHUD.hide(for: tableView, animated: false)
+        }
+        
+    }
+
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID){
+        
+        print(peerID)
+        
+        if hostName.contains(peerID){
+            
+            hostName.remove(peerID)
+            if(hostName.count == 0){
+                showProgressHud(text: "Searching Host")
+                lblMsg.isHidden = true
+            }
+        }
+        
+        tableView.reloadData()
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error){
+        
+        print(error)
+    }
+    
+    //MARK:- IPSession Delegates
+    func receiveMessage(message: String, from peerid: MCPeerID){
+    
+        print(message)
+        
+        let dict : [String: Any] =  convertJsonToDictionary(json: message)!
+        let str : String = dict["message"] as! String
+        
+        DispatchQueue.main.async {
+            
+            if(str == "getPeersInfo") {
+            
+                let arrayDisplayName = dict["peersNameList"] as! NSArray
+                
+                let myPeerName : String = (appDelegate.IPSession.session?.myPeerID.displayName.capitalized)!
+                
+                if arrayDisplayName.contains(myPeerName){
+                    appDelegate.IPSession.session?.disconnect()
+                    self.showAlert()
+                }
+                else{
+                    self.navigateToSelectPlay()
+                }
+            }
+        }
+    }
+    
+    //MARK:- Alert
+    /*show alert if player name already exists in game*/
+    func showAlert() {
+        
+        let controller = UIAlertController.init(title:kPlayerAlreadyExistsTitle, message:kPlayerAlreadyExists, preferredStyle: .alert)
+        
+        let okAction = UIAlertAction.init(title: "OK", style: .default) { (action:UIAlertAction!) in
+            
+            let array = self.navigationController?.viewControllers
+            
+            for obj in array! {
+                print(obj)
+                if obj.isKind(of: IndividualPlayViewController.self)  {
+                    _ =  self.navigationController?.popToViewController(obj, animated: false)
+                }
+            }
+        }
+        
+        controller.addAction(okAction)
+        present(controller, animated: true, completion: nil)
+    }
+    
+    /*If User is unsuccessfull in connecting with Host*/
+    func showNotConnectedAlert(){
+        
+        let alert = UIAlertController.init(title: kConnectionLostTitle, message: kConnectionLostMessage, preferredStyle: .alert)
+        let okAction = UIAlertAction.init(title: "OK", style: .cancel) { (action:UIAlertAction!) in
+        }
+        alert.addAction(okAction)
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    //MARK:- Button Back
+    @IBAction func btnBack(_ sender: Any) {
+        
+        browser.stopBrowsingForPeers()
+        browser.delegate = nil
+        appDelegate.IPSession.session?.disconnect()
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK: TouchDown Actions
+    @IBAction func touchDown(_ sender: AnyObject) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+}

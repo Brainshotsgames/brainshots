@@ -1,0 +1,165 @@
+//
+//  ProfileViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import FBSDKCoreKit
+import FBSDKLoginKit
+import FBSDKShareKit
+import CoreData
+
+class ProfileViewController: UIViewController {
+    
+    //MARK: Declare Properties
+    @IBOutlet var imgProfile: UIImageView!
+    @IBOutlet var lblUserName: UILabel!
+    @IBOutlet var lblName: UILabel!
+    @IBOutlet var lblCountry: UILabel!
+    @IBOutlet var lblGender: UILabel!
+    @IBOutlet var btnUploadPhoto: UIButton!
+    @IBOutlet var lblDate: UILabel!
+    @IBOutlet var btnEditProfile: UIButton!
+    @IBOutlet var vwGameStats: UIView!
+    @IBOutlet var lblGamesPlayed: UILabel!
+    @IBOutlet var lblBestGame: UILabel!
+    
+    // Variables
+    var first_name = String()
+    var last_name = String()
+    var email = String()
+    var gender = String()
+    var date = String()
+    var country = String()
+    
+    
+    // MARK: View Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: imgProfile)
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: vwGameStats)
+        CommonFunctions.sharedInstance.setupButtonBorderwithRadius(vw: btnEditProfile)
+        
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        
+        super.viewWillAppear(true)
+        checkLoginStatus()
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+     // MARK: - Navigation
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if(segue.identifier == "editProfile") {
+        
+            let controller = segue.destination as! EditProfileViewController
+            controller.first_name   = first_name
+            controller.last_name    = last_name
+            controller.email        = email
+            controller.gender       = gender
+            controller.country      = country
+            controller.image        = imgProfile.image!
+        }
+     }
+    
+    func checkLoginStatus() {
+    
+        if(UserDefaults.standard.bool(forKey: "login") == true) {
+        
+            getProfileDetails()
+            btnEditProfile.isHidden = false
+            
+        } else{
+        
+            lblUserName.text = ""
+            lblName.text = "Guest"
+            lblGender.text = "Male"
+            lblCountry.text = "USA"
+            lblDate.text = CommonFunctions.sharedInstance.getCurrentDate()
+            imgProfile.image = UIImage(named: "dummy_profile.png")
+            btnEditProfile.isHidden = true
+        }
+    }
+    
+    // MARK: Get Profile Details
+    func getProfileDetails() {
+    
+        let context = getContext()
+        let entity =  NSEntityDescription.entity(forEntityName: "Profile", in: context)
+        let request: NSFetchRequest<Profile> = Profile.fetchRequest()
+        request.entity = entity
+        
+        do {
+            
+            let fetchResults = try getContext().fetch(request)
+            for trans in fetchResults as [NSManagedObject] {
+            
+                first_name      = trans.value(forKey: "firstName") as! String
+                last_name       = trans.value(forKey: "lastName") as! String
+                email           = trans.value(forKey: "email") as! String
+                gender          = trans.value(forKey: "gender") as! String
+                date            = trans.value(forKey: "date") as! String
+                country         = trans.value(forKey: "country") as! String
+                let imageData   = trans.value(forKey: "image") as! Data
+                
+                lblName.text = ("\(first_name) \(last_name)")
+                lblUserName.text = email
+                lblGender.text = gender
+                lblCountry.text = country
+                lblDate.text = date
+                let image : UIImage = UIImage(data: imageData)!
+                imgProfile.image = CommonFunctions.sharedInstance.cropToBounds(image: image, width: Double(imgProfile.frame.size.width), height: Double(imgProfile.frame.size.height))
+            }
+           
+        } catch let error as NSError {
+            
+            print(error.localizedDescription)
+        }
+    }
+
+    // MARK:- Button Actions
+    @IBAction func btnEditProfile(_ sender: AnyObject){
+        
+    }
+
+    @IBAction func backBtn(_ sender: AnyObject){
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func btnLogout(_ sender: AnyObject) {
+        
+        showSheet()
+    }
+
+    //MARK: Logout Action Sheet
+    func showSheet () {
+        
+        let actionSheetController: UIAlertController = UIAlertController(title:nil, message: nil, preferredStyle: .actionSheet)
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheetController.addAction(cancelActionButton)
+        let logoutActionButton: UIAlertAction = UIAlertAction(title: "Logout", style: .destructive)
+        { action -> Void in
+            
+            UserDefaults.standard.set(false, forKey: "login")
+            fbLoginManager.logOut()
+            FBSDKAccessToken.setCurrent(nil)
+            FBSDKProfile.setCurrent(nil)
+            _ = self.navigationController?.popViewController(animated: true)
+        }
+        actionSheetController.addAction(logoutActionButton)
+        self.present(actionSheetController, animated: true, completion: nil)
+    }
+}

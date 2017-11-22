@@ -1,0 +1,212 @@
+//
+//  SinkerViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class SinkerViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+    
+    @IBOutlet weak var tableView: UITableView!
+    var sinkArray = NSArray()
+    
+    var fridgeDoorOpenPlayer : AVAudioPlayer?
+    var munchBitePlayer : AVAudioPlayer?
+    var pizzaGrabPlayer :AVAudioPlayer?
+    
+    let showAnimationImgView = UIImageView()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        sinkArray = ["MARSHMALLOWS","PRETZELS","CHIPS","COOKIES","NACHOS","FRUIT","CHEESE & CRACKERS","PIZZA","CHOCLATE","OTHERS"]
+        tableView.separatorColor = UIColor.clear
+        
+        fridgeDoorOpenSound()
+        munchBiteSound()
+        pizzaGrabSound()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            
+            self.addSinkerAnimation()
+        }
+
+        // Do any additional setup after loading the view.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return sinkArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "Cell"
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
+        let shotsName : String = "\(String(indexPath.row + 1)). \(String(describing: sinkArray.object(at: indexPath.row)))"
+        
+        cell.textLabel?.text = shotsName
+        cell.textLabel?.font = UIFont.init(name: "FatFrank-Regular", size: 20);
+        cell.textLabel?.textColor = UIColor.white
+        
+        let tapAction = UIButton()
+        tapAction.frame = CGRect(x: 0, y: 3, width: 135, height: 30)
+        cell.contentView.addSubview(tapAction)
+        tapAction.tag = indexPath.row
+        tapAction.addTarget(self, action: #selector(btnAction), for: .touchUpInside)
+        tapAction.addTarget(self, action: #selector(touchDown), for: .touchDown)
+        
+        cell.selectionStyle = UITableViewCellSelectionStyle.none
+        
+        return cell
+        
+    }
+    
+    func btnAction(_sender:UIButton){
+        
+        showAnimation(index: _sender.tag)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 50
+    }
+    
+    func addSinkerAnimation() {
+        
+        var imgSinker = UIImage()
+        showAnimationImgView.frame = self.view.frame
+        self.view.addSubview(showAnimationImgView)
+        showAnimationImgView.isHidden = true
+        
+        var url = NSURL()
+        var data = Data()
+        url = Bundle.main.url(forResource: "Kitchen Sinker_Small", withExtension: "gif")! as NSURL
+        
+        do {
+            data = try Data.init(contentsOf: url as URL)
+        } catch {
+            print(error)
+        }
+        
+        imgSinker = UIImage.animatedImage(withAnimatedGIFData:data)!
+        showAnimationImgView.animationImages = imgSinker.images
+        showAnimationImgView.animationDuration = imgSinker.duration;
+        showAnimationImgView.animationRepeatCount = 1;
+        showAnimationImgView.image = imgSinker.images?.last
+        
+    }
+    
+    func showAnimation(index:NSInteger) {
+        
+        self.view.isUserInteractionEnabled = false
+        showAnimationImgView.isHidden = false
+        showAnimationImgView.startAnimating()
+        
+        perform(#selector(fridgeDoorOpen), with: nil, afterDelay: 0.1)
+        perform(#selector(munchBite), with: nil, afterDelay: 0.2)
+        perform(#selector(pizzaGrabSlice), with: nil, afterDelay: 0.3)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.6) {
+            
+            let text = "\(self.sinkArray.object(at: index))"
+            let popUp = PopupView.init(frame: CGRect(x: 10, y: self.view.frame.size.height - 120, width: self.view.frame.size.width - 120, height: 100))
+            popUp.setLabel(text: "Your Shot is \n \(text.capitalized)")
+            popUp.setTransitionToController(target:self)
+            
+            /*Block to hide animation*/
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0){
+                
+                self.showAnimationImgView.removeFromSuperview()
+                self.addSinkerAnimation()
+                popUp.removeFromSuperview()
+            }
+            self.view.isUserInteractionEnabled = true
+        }
+    }
+    
+    /*Play Fridge Door Open Sound*/
+    func fridgeDoorOpen(){
+    
+        fridgeDoorOpenPlayer?.prepareToPlay()
+        fridgeDoorOpenPlayer?.play()
+    }
+    
+    /*Play Munch Bite Sound*/
+    func munchBite(){
+        
+        munchBitePlayer?.prepareToPlay()
+        munchBitePlayer?.play()
+    }
+    
+    /*Play Pizza Grab Slice Sound*/
+    func pizzaGrabSlice(){
+        
+        pizzaGrabPlayer?.prepareToPlay()
+        pizzaGrabPlayer?.play()
+    }
+    
+    /*Add Fridge Door Open Sound*/
+    func fridgeDoorOpenSound() {
+        
+        let url = Bundle.main.url(forResource: "FRIDGE DOOR OPEN", withExtension: "wav")!
+        
+        do {
+            fridgeDoorOpenPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let fridgeDoorOpenPlayer = fridgeDoorOpenPlayer else { return }
+            fridgeDoorOpenPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Munch Bite Sound*/
+    func munchBiteSound(){
+        
+        let url = Bundle.main.url(forResource: "MUNCH BITE", withExtension: "wav")!
+        
+        do {
+            munchBitePlayer = try AVAudioPlayer(contentsOf: url)
+            guard let munchBitePlayer = munchBitePlayer else { return }
+            munchBitePlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Munch Bite Sound*/
+    func pizzaGrabSound(){
+        
+        let url = Bundle.main.url(forResource: "PIZZA GRAB SLICE", withExtension: "wav")!
+        
+        do {
+            pizzaGrabPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let pizzaGrabPlayer = pizzaGrabPlayer else { return }
+            pizzaGrabPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Back Button Action*/
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK:- TouchDown Actions Sound
+    @IBAction func touchDown(_ sender: AnyObject) {
+        CommonFunctions.sharedInstance.buttonPressedSound()
+    }
+}

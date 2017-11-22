@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    HIPHOP.plist
+   Brainshots
+
+   Created by Amritpal Singh on 29/03/17.
+   Copyright (c) 2017 Anuradha Sharma. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>WordPack</key>
+        <array>
+            <string>noise</string>
+            <string>boy</string>
+            <string>real</string>
+            <string>money</string>
+            <string>talk</string>
+            <string>crazy</string>
+            <string>feel</string>
+            <string>play</string>
+            <string>burn</string>
+            <string>pound</string>
+            <string>beat</string>
+            <string>mad</string>
+            <string>fame</string>
+            <string>D.J.</string>
+            <string>gold</string>
+            <string>bang</string>
+            <string>break</string>
+            <string>booty</string>
+            <string>drop</string>
+            <string>funk</string>
+            <string>down</string>
+            <string>house</string>
+            <string>shawty</string>
+            <string>dance</string>
+            <string>young</string>
+            <string>yeah</string>
+            <string>work</string>
+            <string>win</string>
+            <string>sorry</string>
+            <string>sex</string>
+            <string>shake</string>
+            <string>sing</string>
+            <string>party</string>
+            <string>girl</string>
+            <string>loud</string>
+            <string>club</string>
+            <string>move</string>
+            <string>high</string>
+            <string>jump</string>
+            <string>hey</string>
+            <string>floor</string>
+            <string>low</string>
+            <string>city</string>
+            <string>world</string>
+            <string>pump</string>
+            <string>dirty</string>
+            <string>baby</string>
+            <string>body</string>
+            <string>you</string>
+            <string>fine</string>
+            <string>drink</string>
+            <string>see</string>
+            <string>stop</string>
+            <string>stand</string>
+            <string>bad</string>
+            <string>smoke</string>
+            <string>never</string>
+            <string>give</string>
+            <string>fire</string>
+            <string>music</string>
+            <string>bass</string>
+            <string>call</string>
+            <string>shot</string>
+            <string>Friday</string>
+            <string>Fun</string>
+        </array>
+        <key>LightningRound</key>
+        <array>
+            <string>Sing as many songs as you can with the words “off” or “on”</string>
+            <string>Sing as many songs as you can with the words “happy” or “sad”</string>
+            <string>Sing as many nursery rhymes as you can</string>
+            <string>Sing as many songs as you can about your booty</string>
+            <string>Sing as many songs whose titles start with letter “C”</string>
+            <string>Sing as many songs as you can with the words “good” or “bad”</string>
+            <string>Sing as many songs whose titles start with letter “G”</string>
+            <string>Sing as many songs with different boys names</string>
+            <string>Sing as many rap songs as you can</string>
+            <string>Sing as many songs whose titles start with letter “H”</string>
+            <string>Sing as many songs as you can that name different types of shoes</string>
+            <string>Sing as many songs that contain different numbers</string>
+            <string>Sing as many songs whose titles start with letter “F”</string>
+            <string>Sing as many songs that contain different drink names</string>
+            <string>Sing as many songs as you can with the words “high” or “Low”</string>
+        </array>
+    </dict>
+</plist>

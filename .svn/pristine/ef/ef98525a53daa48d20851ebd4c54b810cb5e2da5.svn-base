@@ -1,0 +1,67 @@
+//
+//  DemoViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 06/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class DemoViewController: UIViewController {
+
+    @IBOutlet weak var imgView1: FLAnimatedImageView!
+    @IBOutlet weak var imgView2: FLAnimatedImageView!
+    @IBOutlet weak var imgView3: FLAnimatedImageView!
+    @IBOutlet weak var imgView4: FLAnimatedImageView!
+    @IBOutlet weak var imgView5: FLAnimatedImageView!
+    @IBOutlet weak var imgView6: FLAnimatedImageView!
+    @IBOutlet weak var imgView7: FLAnimatedImageView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        
+        let url1 : NSURL = Bundle.main.url(forResource: "animate1", withExtension: "gif")! as NSURL
+        let data1 = NSData(contentsOf: url1 as URL)
+        imgView1.animatedImage = FLAnimatedImage(gifData: data1 as Data!)
+        
+        let url2 : NSURL = Bundle.main.url(forResource: "animate2", withExtension: "gif")! as NSURL
+        let data2 = NSData(contentsOf: url2 as URL)
+        imgView3.animatedImage = FLAnimatedImage(gifData: data2 as Data!)
+        
+        let url3 : NSURL = Bundle.main.url(forResource: "animate3", withExtension: "gif")! as NSURL
+        let data3 = NSData(contentsOf: url3 as URL)
+        imgView3.animatedImage = FLAnimatedImage(gifData: data3 as Data!)
+        
+        let url4 : NSURL = Bundle.main.url(forResource: "animate4", withExtension: "gif")! as NSURL
+        let data4 = NSData(contentsOf: url4 as URL)
+        imgView4.animatedImage = FLAnimatedImage(gifData: data4 as Data!)
+        
+        let url5 : NSURL = Bundle.main.url(forResource: "animate5", withExtension: "gif")! as NSURL
+        let data5 = NSData(contentsOf: url5 as URL)
+        imgView5.animatedImage = FLAnimatedImage(gifData: data5 as Data!)
+        
+        let url6 : NSURL = Bundle.main.url(forResource: "animate6", withExtension: "gif")! as NSURL
+        let data6 = NSData(contentsOf: url6 as URL)
+        imgView6.animatedImage = FLAnimatedImage(gifData: data6 as Data!)
+        
+        let url7 : NSURL = Bundle.main.url(forResource: "animate7", withExtension: "gif")! as NSURL
+        let data7 = NSData(contentsOf: url7 as URL)
+        imgView7.animatedImage = FLAnimatedImage(gifData: data7 as Data!)
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+}

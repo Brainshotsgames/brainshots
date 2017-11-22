@@ -1,0 +1,68 @@
+//
+//  VictoryViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class VictoryViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+
+    @IBOutlet weak var btnQuit: UIButton!
+    @IBOutlet weak var btnNewGame: UIButton!
+    @IBOutlet weak var tableView: UITableView!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+
+        CommonFunctions.sharedInstance.setupButtonBorder(vw:btnQuit )
+        CommonFunctions.sharedInstance.setupButtonBorder(vw:btnNewGame )
+        tableView.separatorColor = UIColor.clear
+        
+        btnQuit.addTarget(self, action: #selector(quitAction), for: .touchUpInside)
+        
+        // Do any additional setup after loading the view.
+    }
+
+    
+    func quitAction() {
+        
+        //NSApplication.sharedApplication().terminate(self)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 4
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId  = "Cell"
+        
+        let cell : VictoryCell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! VictoryCell
+
+        if(indexPath.row == 0) {
+        
+            cell.lblPlayer.font = UIFont.systemFont(ofSize: 25)
+            cell.lblPoints.font = UIFont.systemFont(ofSize: 25)
+        }
+        
+        cell.lblPlayer.text = "Player One"
+        cell.lblPoints.text = "20"
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 30
+    }
+    
+}

@@ -1,0 +1,152 @@
+//
+//  ViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MBProgressHUD
+import CoreData
+
+class HomeViewController: UIViewController {
+    
+    //MARK:- View Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:-  Facebook Login
+    @IBAction func btnFacebookLogin(_ sender: AnyObject) {
+        
+        MBProgressHUD.showAdded(to: self.view, animated: true)
+        let objFacebook = Facebook()
+        objFacebook.getFbData(self, selector: #selector(FBDatResponse))
+    }
+
+    func FBDatResponse(_ dict:AnyObject)  {
+
+        if(dict.value(forKeyPath: "response.code") as! String == "200") {
+            
+            UserDefaults.standard.set(true, forKey: "login")
+            
+            // Check Previous Records
+            checkPreviousRecords()
+            
+            // Save Profile Details Method
+            saveProfileDetails(response: dict.value(forKeyPath: "response.result")! as AnyObject)
+            
+            // Navigate to Select Play Controller
+            let controller = self.storyboard?.instantiateViewController(withIdentifier: "SelectPlayViewController") as! SelectPlayViewController
+            self.navigationController?.pushViewController(controller, animated: true)
+        }
+        else {
+        
+            print("Unable to Login")
+        }
+        
+        MBProgressHUD.hide(for: self.view, animated: true)
+    }
+    
+    //MARK: Check Previous Records
+    func checkPreviousRecords() {
+    
+        let context = getContext()
+        let entity =  NSEntityDescription.entity(forEntityName: "Profile", in: context)
+        let request: NSFetchRequest<Profile> = Profile.fetchRequest()
+        request.entity = entity
+        do {
+            let results = try getContext().fetch(request)
+            for trans in results as [NSManagedObject] {
+                context.delete(trans)
+            }
+        }catch let error as NSError {
+            print(error.localizedDescription)
+        }
+    }
+    
+    //MARK: Save Profile Details
+    func saveProfileDetails(response:AnyObject) {
+        
+        let first_name      = String(describing: response.value(forKey: "first_name")!)
+        let last_name       = String(describing: response.value(forKey: "last_name")!)
+        let email           = String(describing: response.value(forKey: "email")!)
+        let gender          = String(describing: response.value(forKey: "gender")!)
+        let imageUrlString  = String(describing: response.value(forKeyPath: "picture.data.url")!)
+        let date            = String(CommonFunctions.sharedInstance.getCurrentDate())
+        
+        // Check Location
+        var country : String = "USA"
+        if(!(response.value(forKeyPath: "location.name") == nil)){
+            
+            // Get Country Name
+            let location = String(describing:response.value(forKeyPath: "location.name")!)
+            let locArray = location.components(separatedBy: ",")
+            if(locArray.count == 2) {
+                country = locArray[1]
+            } else{
+                country = "USA"
+            }
+        }
+        
+        // Convert profileImage into Data
+        let img_url = NSURL.init(string: imageUrlString)
+        let imageData = NSData(contentsOf: img_url! as URL)
+        
+        // Store Data in Core Data
+        let context = getContext()
+        let entity =  NSEntityDescription.entity(forEntityName: "Profile", in: context)
+        let profile = Profile(entity: entity!, insertInto: context)
+        
+        profile.setValue(first_name, forKey: "firstName")
+        profile.setValue(last_name, forKey: "lastName")
+        profile.setValue(email, forKey: "email")
+        profile.setValue(country, forKey: "country")
+        profile.setValue(gender, forKey: "gender")
+        profile.setValue(imageData, forKey: "image")
+        profile.setValue(date, forKey: "date")
+        
+        do {
+            try context.save()
+            print("saved!")
+        } catch let error as NSError  {
+            print("Could not save \(error), \(error.userInfo)")
+        } 
+    }
+    
+    //Profile Action
+    @IBAction func btnProfileSetUp(_ sender: AnyObject) {
+        
+        let storyBoard : UIStoryboard = UIStoryboard.init(name: "Profile", bundle: nil)
+        let controller = storyBoard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController
+        self.navigationController?.pushViewController(controller, animated: false)
+    }
+    
+    //Play As Guest Action
+    @IBAction func btnPlayAsGuest(_ sender: AnyObject) {
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "SelectPlayViewController") as! SelectPlayViewController
+        self.navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    //Options Action
+    @IBAction func btnOptions(_ sender: AnyObject) {
+        
+        let storyBoard : UIStoryboard = UIStoryboard.init(name: "Options", bundle: nil)
+        let controller = storyBoard.instantiateViewController(withIdentifier: "OptionsViewController") as! OptionsViewController
+        self.navigationController?.pushViewController(controller, animated: false)
+    }
+    
+    //MARK:- TouchDown Action
+    @IBAction func touchDownAction(_ sender: Any) {
+        CommonFunctions.sharedInstance.buttonPressedSound()
+    }
+}
+

@@ -1,0 +1,116 @@
+//
+//  JoinHostViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 20/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+class JoinHostViewController: UIViewController,MCNearbyServiceBrowserDelegate,UITableViewDataSource,UITableViewDelegate {
+
+    @IBOutlet weak var tableView: UITableView!
+    var browser: MCNearbyServiceBrowser!
+    var hostName = NSMutableArray()
+   // var  sessionContainer = SessionContainer()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        createSessionWithHost()
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    /*Create Session*/
+    func createSessionWithHost() {
+        
+        let displayName = UIDevice.current.name
+        // Create the SessionContainer for managing session related functionality.
+        appDelegate.sessionContainer = SessionContainer.init(displayName: displayName, serviceType: "connect" ,discoveyInfo: nil, ifAdvertise:false)
+        
+        browser = MCNearbyServiceBrowser.init(peer:appDelegate.sessionContainer.session.myPeerID, serviceType: "connect")
+        browser.delegate = self
+        browser.startBrowsingForPeers()
+    }
+    
+    //MARK:- UITableview Delegates
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return hostName.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "cellid"
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
+        
+        var peerId : MCPeerID?
+        peerId = hostName.object(at: indexPath.row) as? MCPeerID
+        let hostNameStr : String = "\(peerId!.displayName)"
+        cell.selectionStyle = .none
+        cell.textLabel?.text = hostNameStr
+        cell.textLabel?.font = UIFont.init(name: "FatFrank-Regular", size: 20);
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 50
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+         var peerId : MCPeerID?
+         peerId = hostName.object(at: indexPath.row) as? MCPeerID
+         browser.invitePeer(peerId! , to:appDelegate.sessionContainer.session , withContext: nil, timeout: 20)
+        UserDefaults.standard.set(false, forKey: "isHost")
+        CommonFunctions.sharedInstance.setHostID(peerID:peerId!)
+        perform(#selector(navigateToSelectPlay), with: nil, afterDelay: 0.3)
+    }
+    
+    func navigateToSelectPlay() {
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "ChooseShotViewController") as! ChooseShotViewController
+        self.navigationController?.pushViewController(controller, animated: true)
+        
+//        let controller = self.storyboard?.instantiateViewController(withIdentifier: "TestViewController") as! TestViewController
+//        self.navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    /*MCNearbyServiceBrowser Delegates*/
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        
+        print(peerID)
+            if(!(hostName.contains(peerID))){
+                hostName.add(peerID)
+                tableView.reloadData()
+        }
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID){
+        
+        print(peerID)
+        let index : NSInteger =  hostName.index(of: peerID)
+        hostName.removeObject(at: index)
+        tableView.reloadData()
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error){
+        
+        print(error)
+    }
+    
+    @IBAction func btnBack(_ sender: Any) {
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+}

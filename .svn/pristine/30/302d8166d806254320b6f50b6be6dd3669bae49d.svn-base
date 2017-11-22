@@ -1,0 +1,86 @@
+//
+//  OptionsViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class OptionsViewController: UIViewController {
+    
+    //MARK:- Declare Properties
+    
+    @IBOutlet var btnHowToPlay: UIButton!
+    @IBOutlet var btnOptions: UIButton!
+    @IBOutlet var btnMoreGames: UIButton!
+    @IBOutlet var btnLegalDisclaimer: UIButton!
+    @IBOutlet var btnCredits: UIButton!
+    @IBOutlet var btnInAppPurchase: UIButton!
+    @IBOutlet weak var btnBack: UIButton!
+    
+    //MARK:- View Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- TouchUp Actions
+    //How to Play
+    @IBAction func btnHowToPlay(_ sender: AnyObject) {
+       
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"TutorialViewController") as! TutorialViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    // Sound Options
+    @IBAction func btnOptions(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"SoundViewController") as! SoundViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    // More Games
+    @IBAction func btnMoreGames(_ sender: AnyObject) {
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"MoreGamesViewController") as! MoreGamesViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    // Legal Disclaimer
+    @IBAction func btnLegalDisclaimer(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"LegalDisclaimerViewController") as! LegalDisclaimerViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+
+    // Credits
+    @IBAction func btnCredits(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"CreditViewController") as! CreditViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    //InApp Purchase
+    @IBAction func btnInAppPurchase(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"TestViewController") as! TestViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    //Back Action
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+         _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK:- TouchDown Action
+    @IBAction func touchDownAction(_ sender: Any) {
+        CommonFunctions.sharedInstance.buttonPressedSound()
+    }
+}

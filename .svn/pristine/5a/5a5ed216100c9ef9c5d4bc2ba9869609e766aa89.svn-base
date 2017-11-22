@@ -1,0 +1,79 @@
+//
+//  CreateTeamViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 23/03/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+class CreateTeamViewController: UIViewController,UITextFieldDelegate {
+    
+    @IBOutlet weak var txtTeamName: UITextField!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        txtTeamName.delegate = self
+        UserDefaults.standard.set(false, forKey: "isInvited")
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Advertising Peer
+    func startAdvertise() {
+        
+        //Create the SessionContainer for managing session related functionality.
+        let string  = txtTeamName.text!
+        let hostName = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        appDelegate.TPSession = TeamPlayersSession.init(displayName:hostName, serviceType: "connectTeam",ifAdvertise: true)
+    }
+    
+    //MARK:- Text Field Delegate
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        txtTeamName.resignFirstResponder()
+        return true
+    }
+    
+    //MARK:- Actions
+    @IBAction func btnNext(_ sender: Any) {
+        
+        if(!((txtTeamName.text?.isEmpty)!)) {
+            
+            startAdvertise()
+            let hostPeer : MCPeerID = (appDelegate.TPSession.session?.myPeerID)!
+            CommonFunctions.sharedInstance.setHostID(peerID:hostPeer)
+            UserDefaults.standard.set(true, forKey: "isHost")
+            navigate()
+        }
+    }
+    
+    @IBAction func btnBack(_ sender: Any) {
+        
+        appDelegate.TPSession.session?.disconnect()
+        appDelegate.TPSession.advertiserAssistant?.stopAdvertisingPeer()
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK:- TouchDown Actions
+    @IBAction func touchDown(_ sender: AnyObject) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+    
+    //MARK:- Navigate
+    func navigate(){
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "ConnectedPlayersViewController") as! ConnectedPlayersViewController
+        self.navigationController?.pushViewController(controller, animated: true)
+        
+}
+
+}

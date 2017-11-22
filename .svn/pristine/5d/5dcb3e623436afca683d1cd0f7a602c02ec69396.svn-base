@@ -1,0 +1,84 @@
+//
+//  HowToPlay2VC.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 24/01/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+let Individual_Play_Continued = "The new round begins with player 2 and everyone is back in for the next \"random word.\"  No song may be repeated in the same round.  You can use a variation of the word (eg. love, lover, loving). You must 'sing' the song, no talking!  Once per game, each player is randomly selected for a lightning round to gain extra points (as many songs as you can sing in a category in 30 seconds)."
+
+class HowToPlay2VC: UIViewController {
+
+    @IBOutlet weak var backView: UIView!
+    @IBOutlet weak var lblText: UILabel!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+        
+        //Set border for textlabel
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+        
+        //Add attributed string
+        var attributedString = NSMutableAttributedString()
+        attributedString = NSMutableAttributedString(string: Individual_Play_Continued)
+        
+        //Set paragraph style
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 7 //Whatever line spacing you want in points
+        
+        //Set font family
+        let font = UIFont(name:kFatFrankRegular, size: setFontSize())
+        
+        //Add attributes
+        attributedString.addAttribute(NSFontAttributeName, value: font! ,range:NSMakeRange(0, attributedString.length))
+        attributedString.addAttribute(NSParagraphStyleAttributeName, value:paragraphStyle, range:NSMakeRange(0, attributedString.length))
+        //attributedString.addAttribute(NSForegroundColorAttributeName, value: kYellowColor , range: NSMakeRange(0, attributedString.length))
+        
+        // set label text
+        lblText.attributedText = attributedString;
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    // Set Font Size
+    func setFontSize()-> CGFloat {
+        
+        var fontSize = CGFloat()
+        
+        if (DeviceType.IS_IPHONE_5) {
+            fontSize = 16.0
+        }
+        else if (DeviceType.IS_IPHONE_6) {
+            fontSize = 19.0
+        }
+        else if (DeviceType.IS_IPHONE_6P) {
+            fontSize = 22.0
+        }
+        else if (DeviceType.IS_IPHONE_4_OR_LESS){
+            fontSize = 14.0
+        }
+        return fontSize
+    }
+    
+
+    /*
+    // MARK: - Navigation
+
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destinationViewController.
+        // Pass the selected object to the new view controller.
+    }
+    */
+
+}

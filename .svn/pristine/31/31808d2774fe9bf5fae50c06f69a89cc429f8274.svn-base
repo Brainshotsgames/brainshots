@@ -1,0 +1,96 @@
+//
+//  CurtainViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 18/01/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+protocol hideCurtainDelegate {
+    func hideCurtains()
+}
+
+class CurtainViewController: UIViewController {
+
+    var delegate:hideCurtainDelegate?
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func closeCurtains() {
+        
+        let closeCurtainImgView = FLAnimatedImageView(frame: self.view.frame)
+        self.view.addSubview(closeCurtainImgView)
+
+        var url = NSURL()
+        
+        if(DeviceType.IS_IPHONE_6P){
+        
+           url = Bundle.main.url(forResource: "CurtainClose640", withExtension: "gif")! as NSURL
+        }
+        else{
+        
+            url = Bundle.main.url(forResource: "CurtainClose320", withExtension: "gif")! as NSURL
+        }
+        
+        let data = NSData(contentsOf: url as URL)
+        let animatedImage = FLAnimatedImage(animatedGIFData: data as Data!)
+        animatedImage?.loopCount = 1
+        closeCurtainImgView.animatedImage = animatedImage
+        
+        var soundID : SystemSoundID = 0
+        let path = Bundle.main.path(forResource: "CURTAINS CLOSE_OPEN", ofType: "wav")
+        AudioServicesCreateSystemSoundID(URL(fileURLWithPath:path!) as CFURL, &soundID)
+        AudioServicesPlaySystemSound(soundID)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            
+            closeCurtainImgView.removeFromSuperview()
+            self.openCurtains()
+        }
+    }
+    
+    func openCurtains() {
+        
+        let openCurtainImgView = FLAnimatedImageView(frame: self.view.frame)
+        self.view.addSubview(openCurtainImgView)
+        
+        var url = NSURL()
+        
+        if(DeviceType.IS_IPHONE_6P){
+            
+            url = Bundle.main.url(forResource: "CurtainOpen640", withExtension: "gif")! as NSURL
+        }
+        else{
+            
+            url = Bundle.main.url(forResource: "CurtainOpen320", withExtension: "gif")! as NSURL
+        }
+        
+        let data = NSData(contentsOf: url as URL)
+        let animatedImage = FLAnimatedImage(animatedGIFData: data as Data!)
+        animatedImage?.loopCount = 1
+        openCurtainImgView.animatedImage = animatedImage
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            
+            openCurtainImgView.removeFromSuperview()
+            self.hideCurtains()
+        }
+    }
+    
+    func hideCurtains() {
+        
+        delegate?.hideCurtains()
+    }
+}

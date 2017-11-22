@@ -1,0 +1,116 @@
+//
+//  ChooseShotViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import MultipeerConnectivity
+
+class ChooseShotViewController: UIViewController,IPSessionDelegate {
+
+    /*Elements*/
+    @IBOutlet weak var btnDrinker: UIButton!
+    @IBOutlet weak var btnThinker: UIButton!
+    @IBOutlet weak var btnSinker: UIButton!
+    @IBOutlet weak var backViewShot: UIView!
+    @IBOutlet weak var backViewDrinker: UIView!
+    
+    var timer = Timer()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        appDelegate.IPSession.delegate = self
+        
+        UserDefaults.standard.set(true, forKey: "GameStarts")
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(checkIfPlayerLostConnection), name: NSNotification.Name(rawValue: "connectionLost"), object: nil)
+        
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    /*Regular Check for Lost Connection*/
+    func checkIfPlayerLostConnection(){
+    
+        DispatchQueue.main.async {
+            self.showAlert()
+        }
+    }
+    
+    /*Show Alert if connection losts*/
+    func showAlert() {
+        
+        let controller = UIAlertController.init(title: "Connection Lost", message:"Please  start again", preferredStyle: .alert)
+        
+        let okAction = UIAlertAction.init(title: "OK", style: .default) { (action:UIAlertAction!) in
+            
+            let array = self.navigationController?.viewControllers
+            
+            for obj in array! {
+                print(obj)
+                if obj.isKind(of: IndividualPlayViewController.self)  {
+                    _ =  self.navigationController?.popToViewController(obj, animated: false)
+                    NotificationCenter.default.removeObserver(self, name:NSNotification.Name(rawValue: "connectionLost"), object: nil)
+                }
+            }
+        }
+        
+        controller.addAction(okAction)
+        present(controller, animated: true, completion: nil)
+    }
+
+    /*IPSession Delegate*/
+    func receiveMessage(message: String, from peerid: MCPeerID) {
+        
+        DispatchQueue.main.async {
+            CommonFunctions.sharedInstance.addPlayers(peer:peerid)
+        }
+    }
+    
+    //MARK:- Touchup Actions
+    @IBAction func btnDrinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"DrinkerViewController") as! DrinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    @IBAction func btnThinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"ThinkerViewController") as! ThinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    @IBAction func btnKitchenSinker(_ sender: AnyObject) {
+        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier:"SinkerViewController") as! SinkerViewController
+        self.navigationController?.pushViewController(vc, animated: false)
+    }
+    
+    //MARK:- Back Button
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        NotificationCenter.default.removeObserver(self, name:NSNotification.Name(rawValue: "connectionLost"), object: nil)
+        
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+            appDelegate.IPSession.advertiserAssistant?.startAdvertisingPeer()
+        }
+        else{
+            appDelegate.IPSession.session?.disconnect()
+        }
+        
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //MARK:- TouchDown Actions Sound
+    @IBAction func touchDown(_ sender: AnyObject) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+}

@@ -1,0 +1,593 @@
+//
+//  LightningViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 10/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+import MultipeerConnectivity
+
+class LightningViewController: UIViewController,UIGestureRecognizerDelegate,IPSessionDelegate {
+
+    //MARK:- Outlets
+    @IBOutlet weak var imgBackground: UIImageView!
+    @IBOutlet weak var lblTimer: UILabel!
+    @IBOutlet weak var lblWord: UILabel!
+    @IBOutlet weak var lblResult: UILabel!
+    @IBOutlet weak var lblPlayer: UILabel!
+    @IBOutlet weak var lblWordHeightConstraint: NSLayoutConstraint!
+    
+    //MARK:- Variables
+    var goodGuessBell : AVAudioPlayer?
+    var timer = Timer()
+    var checkTimer = Timer()
+    var count = NSInteger()
+    let swipeGesture = UISwipeGestureRecognizer()
+    var score : NSInteger = 0
+    var randomWord = String()
+    var displayName = String()
+    var playWord = String()
+    var totalScores = NSInteger()
+    var myTurn = Bool()
+    var winner = String()
+    var myPeerName = String()
+    var isLightningRoundOver = Bool()
+    
+    //MARK:- Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        print(CommonFunctions.sharedInstance.getLightningRoundWordArray())
+        
+        /*Iphone 4 Check*/
+        iphone4Check()
+        
+        /*Set defaults to false if players navigate to lightning round*/
+        UserDefaults.standard.set(false, forKey: "navigateToLightning")
+        appDelegate.IPSession.delegate = self
+        
+        /*Get Self PeerName*/
+        myPeerName = (appDelegate.IPSession.session?.myPeerID.displayName)!
+        
+        /*Host Check to select random player*/
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+            perform(#selector(selectRandomPlayer), with: nil, afterDelay: 2)
+        }
+        
+        /*Add Good Guess Sound*/
+        goodGuessSound()
+        
+        /*Add Shadow to Views*/
+        CommonFunctions.sharedInstance.setShadowToView(target:lblTimer)
+        CommonFunctions.sharedInstance.setShadowToView(target:lblWord)
+        CommonFunctions.sharedInstance.setShadowToView(target:lblResult)
+        
+        /*Right Swipe Gesture*/
+        swipeGesture.direction = .right
+        swipeGesture.addTarget(self, action: #selector(swipeAction))
+        
+        /*Add Notifcation to invalidate sound if the connection losts*/
+        NotificationCenter.default.addObserver(self, selector: #selector(connectionLost), name: NSNotification.Name(rawValue: "invalidateTimerSound"), object: nil)
+        
+        if(UserDefaults.standard.bool(forKey: "isHost")) {
+        
+            if((appDelegate.IPSession.session?.connectedPeers.count)! > 1){
+            
+                  NotificationCenter.default.addObserver(self, selector: #selector(connectionLostForPeer), name: NSNotification.Name(rawValue: "lightningRoundConnectionCheck"), object: nil)
+            }
+        }
+    }
+    
+    func connectionLostForPeer(notification:NSNotification){
+        
+        DispatchQueue.main.async {
+            
+            let dict : [String:Any] = notification.userInfo as! [String:Any]
+            let peer : MCPeerID = dict["peer"] as! MCPeerID
+            print(peer)
+            print(CommonFunctions.sharedInstance.getPlayersScore())
+            let scoreBoard = CommonFunctions.sharedInstance.getPlayersScore()
+            
+            if (self.displayName == peer.displayName){
+                
+                let jsonObject  = ["message":"peerDisconnects","scoreBoard":scoreBoard] as [String : Any]
+                let str = getJsonString(dict: jsonObject)
+                appDelegate.IPSession.sendMessage(message: str)
+                
+                if(self.timer.isValid){
+                
+                    self.timer.invalidate()
+                }
+                else {
+                    self.checkWhenTimerStarts()
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                
+                    self.lblTimer.text = ""
+                    self.lblWord.text = ""
+                    self.lblPlayer.text = ""
+                    
+                    let strResult : String = "\(self.displayName) Lost Connection."
+                    self.lblResult.text = strResult
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        
+                        self.navigateToLeaderBoard()
+                    }
+                
+                }
+            }
+        }
+    }
+    
+    func checkWhenTimerStarts(){
+    
+        checkTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(stopTimer), userInfo: nil, repeats: true)
+    }
+    
+    func stopTimer(){
+    
+        if(timer.isValid){
+        
+            timer.invalidate()
+            checkTimer.invalidate()
+            SoundManager.sharedInstance.stopFx()
+            
+            self.lblWord.text = ""
+            self.lblPlayer.text = ""
+            self.lblTimer.text = ""
+        }
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Iphone 4 Check
+    func iphone4Check(){
+    
+        if(DeviceType.IS_IPHONE_4_OR_LESS) {
+            
+            lblPlayer.font = UIFont.init(name: kFatFrankRegular, size: 25)
+            lblWordHeightConstraint.constant = 50
+            lblTimer.font = UIFont.init(name: kDSDigitalBold, size: 50)
+        }
+    }
+    
+    //MARK:- Notification
+    /*Called when connection lost*/
+    func connectionLost() {
+        
+        DispatchQueue.main.async {
+            
+            if(self.timer.isValid) {
+                
+                self.timer.invalidate()
+                SoundManager.sharedInstance.stopFx()
+                
+                self.lblWord.text = ""
+                self.lblPlayer.text = ""
+                self.lblTimer.text = ""
+            }
+            else{
+                self.checkWhenTimerStarts()
+            }
+            
+            NotificationCenter.default.removeObserver(self, name:NSNotification.Name(rawValue: "invalidateTimerSound"), object: nil)
+        }
+    }
+
+    //MARK:- Random Word
+    func getRandomWord()-> String {
+        
+        let array : [String] = CommonFunctions.sharedInstance.getLightningRoundWordArray()
+        let element = array.randomElement
+        CommonFunctions.sharedInstance.removeLightningRoundWord(element: element)
+        return element
+    }
+    
+    //MARK:- Random Selection of Player by Host
+    func selectRandomPlayer() {
+    
+        let array  = CommonFunctions.sharedInstance.getRandomPlayer()
+        print("Random Player --> \(array)")
+        randomWord = getRandomWord()
+        
+        /*Check for array count*/
+        if(array.count == 1) {
+             UserDefaults.standard.set(true, forKey: "lightningRoundOver")
+             isLightningRoundOver = true
+        }
+        else{
+             isLightningRoundOver = false
+        }
+        
+        let element : MCPeerID = array[0]
+        displayName  = element.displayName
+        
+        /*Check if player is Host*/
+        if(displayName == myPeerName){
+            myTurn = true
+        }
+        else{
+            myTurn = false
+        }
+        
+        let jsonObject  = ["message":"success","peer_name":element.displayName,"word":randomWord,"lightningRound":isLightningRoundOver] as [String:Any]
+        let str = getJsonString(dict: jsonObject)
+        appDelegate.IPSession.sendMessage(message: str)
+
+        perform(#selector(updateForHost), with: nil, afterDelay: 0.1)
+        
+        CommonFunctions.sharedInstance.randomPlayer.remove(at: 0)
+        print("Random Players Left  --> \(CommonFunctions.sharedInstance.getRandomPlayer())")
+        
+    }
+    
+    /*Update for Host Method*/
+    func updateForHost() {
+    
+        playWord = randomWord
+        startRound()
+    }
+    
+    //MARK:- Session Delegate Method
+    func receiveMessage(message: String, from peerid: MCPeerID) {
+        
+        let dict : [String: Any] =  convertJsonToDictionary(json: message)!
+        let message : String = dict["message"] as! String
+        
+        DispatchQueue.main.async {
+            
+            print("Message -----> \(message)")
+            
+            if(message == "success") {
+            
+                self.playWord = (dict["word"] as? String)!
+                self.displayName = dict["peer_name"] as! String
+                self.isLightningRoundOver = dict["lightningRound"] as! Bool
+                CommonFunctions.sharedInstance.removeLightningRoundWord(element: self.playWord)
+                
+                /*Check for Lightning Round*/
+                if(self.isLightningRoundOver){
+                    UserDefaults.standard.set(true, forKey: "lightningRoundOver")
+                }
+                else{
+                    UserDefaults.standard.set(false, forKey: "lightningRoundOver")
+                }
+                
+                /*Check for Players Turn*/
+                if(self.displayName == self.myPeerName){
+                    self.myTurn = true
+                }
+                else {
+                     self.myTurn = false
+                }
+                
+                /*Start Round after 0.2 Sec*/
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            self.startRound()
+                }
+            }
+            
+            else if(message == "playOver") {
+                
+                let array : NSArray = dict["scoreboard"] as! NSArray
+                let arr = array.mutableCopy()
+                
+                var navigateToVictory = Bool()
+                navigateToVictory =   dict["navigateToVictory"] as! Bool
+                
+                CommonFunctions.sharedInstance.setScoresArray(array:arr as! NSMutableArray)
+                self.popResultStatus(playerName:dict["peer_name"] as! String,scores:dict["score"]! as! NSInteger,victory:navigateToVictory)
+                
+            }
+            else if(message == "peerDisconnects") {
+            
+                if(self.timer.isValid){
+                    self.timer.invalidate()
+                }
+                else {
+                    self.checkWhenTimerStarts()
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    
+                    self.lblTimer.text = ""
+                    self.lblWord.text = ""
+                    self.lblPlayer.text = ""
+                    
+                    let strResult : String = "\(self.displayName) Lost Connection."
+                    self.lblResult.text = strResult
+                    
+                    let array : NSArray = dict["scoreBoard"] as! NSArray
+                    let arr = array.mutableCopy()
+                    CommonFunctions.sharedInstance.setScoresArray(array:arr as! NSMutableArray)
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        
+                        self.navigateToLeaderBoard()
+                    }
+                }
+                
+//                self.lblTimer.text = ""
+//                self.lblWord.text = ""
+//                self.lblPlayer.text = ""
+//                
+//                let str : String = "\(self.displayName) Lost Connection."
+//                self.lblResult.text = str
+//                
+//                let array : NSArray = dict["scoreBoard"] as! NSArray
+//                let arr = array.mutableCopy()
+//                CommonFunctions.sharedInstance.setScoresArray(array:arr as! NSMutableArray)
+//                
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+//                    self.navigateToLeaderBoard()
+//                }
+            }
+        }
+    }
+    
+    /*Swipe Left Action*/
+    func swipeAction() {
+    
+        score += 1
+        goodGuessBell?.pause()
+        goodGuessBell?.currentTime = 0.0
+        goodGuessBell?.play()
+    }
+    
+    /*Enable Swipe on Turn*/
+    func enableSwipe(){
+    
+        if(myTurn) {
+        
+            self.view.addGestureRecognizer(swipeGesture)
+        }
+        else{
+            self.view.removeGestureRecognizer(swipeGesture)
+        }
+    }
+
+    func startRound() {
+        
+        /*Pop Players Name*/
+        self.lblPlayer.text = "\(displayName)'s turn"
+        CommonFunctions.sharedInstance.setPopupAnimation(target: self.lblWord)
+        
+        /*Popup Random Question*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            
+            self.lblWord.text = self.playWord
+            CommonFunctions.sharedInstance.setPopupAnimation(target: self.lblWord)
+        }
+        
+        /*Add counting animation after 0.2 second delay*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2){
+            self.addCounterAnimation()
+        }
+    }
+    
+    //MARK: Animation
+    /*Start Counting Animation at startup*/
+    func addCounterAnimation() {
+        
+        var imgSinker = UIImage()
+        let showAnimationImgView = UIImageView()
+        showAnimationImgView.frame = self.view.frame
+        self.view.addSubview(showAnimationImgView)
+        
+        var url = NSURL()
+        var data = Data()
+        url = Bundle.main.url(forResource: "Countdown_low", withExtension: "gif")! as NSURL
+        
+        do {
+            data = try Data.init(contentsOf: url as URL)
+        } catch {
+            print(error)
+        }
+        
+        imgSinker = UIImage.animatedImage(withAnimatedGIFData:data)!
+        showAnimationImgView.animationImages = imgSinker.images
+        showAnimationImgView.animationDuration = imgSinker.duration
+        showAnimationImgView.animationRepeatCount = 1
+        showAnimationImgView.image = imgSinker.images?.last
+        showAnimationImgView.startAnimating()
+        
+        /*Play Count Sound after loading count animation*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            
+            SoundManager.sharedInstance.playCountSound()
+
+        }
+        
+        /*Block to show Popup ( Your Drink is *** )*/
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            
+            /*Remove timer image animation from self*/
+            showAnimationImgView.removeFromSuperview()
+            showAnimationImgView.animationImages = nil
+            
+            /*Start Timer after words appear*/
+            self.startCounting()
+        }
+    }
+    
+    //MARK: Animation
+    /*Start Counting Animation at startup*/
+    func startCounting() {
+        
+            /*Start Timer after word appear*/
+            count = 30
+            self.startTimer()
+    }
+    
+    //MARK: Timer
+    /*Start timer method*/
+    func startTimer() {
+        
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
+        CommonFunctions.sharedInstance.setPopupAnimation(target:lblTimer)
+        
+    }
+    
+    /*Call method to run timer for 10 seconds*/
+    func runTimedCode() {
+        
+        if(count < 1) {
+            
+            timer.invalidate()
+            lblTimer.text = "\(count)"
+            self.view.removeGestureRecognizer(swipeGesture)
+            
+            if(displayName == myPeerName){
+                perform(#selector(popResult), with: nil, afterDelay: 1.0)
+            }
+        }
+        else {
+            
+            if(count == 3) {
+                SoundManager.sharedInstance.playLastCountSound()
+            }
+        
+            if(count == 30){
+                enableSwipe()
+            }
+            
+            lblTimer.text = "\(count)"
+            count = count - 1
+        }
+    }
+    
+    /*Show Result on Others Players UI*/
+    func popResult() {
+        
+        lblTimer.isHidden = true
+        lblWord.isHidden = true
+        lblPlayer.isHidden = true
+        
+        let scoreBoard : NSMutableArray = CommonFunctions.sharedInstance.getPlayersScore()
+        let peerName = myPeerName
+        var array = [String]()
+        
+        for i in 0...scoreBoard.count-1 {
+            
+            var dict = [String:Any]()
+            dict = scoreBoard.object(at: i) as! [String : Any]
+            array.insert(dict["peerName"] as! String, at: i)
+        }
+        
+        let index = array.index(of:peerName)
+        let dict : NSDictionary = scoreBoard.object(at:index!) as! NSDictionary
+        let mutableDict : NSMutableDictionary = dict.mutableCopy() as! NSMutableDictionary
+        var score : NSInteger = dict.value(forKey: "score") as! NSInteger
+        score = score + self.score
+        
+        //MARK:- Total Scores
+        /*Calculate Total Scores*/
+        totalScores = score
+        print(totalScores)
+        
+        mutableDict.setValue(score, forKey: "score")
+        print(mutableDict)
+        
+        scoreBoard.replaceObject(at: index!, with: mutableDict)
+        print(scoreBoard)
+        
+        CommonFunctions.sharedInstance.setScoresArray(array:scoreBoard)
+        
+        print("Scoreboard----> \(CommonFunctions.sharedInstance.getPlayersScore())")
+        
+        /*Results to show*/
+        let str : String = "CONGRATS \n \(appDelegate.IPSession.session!.myPeerID.displayName) YOU GOT \n \(self.score) POINTS."
+        lblResult.text = str
+        setPopupAnimation(target: lblResult)
+    
+        /*Get game points from shared instance*/
+        let gamePoint = CommonFunctions.sharedInstance.getGamePoints()
+        
+        
+        /*Check if total Scores Exeeds threshold*/
+        if(totalScores >= gamePoint){
+            
+            let jsonObject  = ["message":"playOver","peer_name":(appDelegate.IPSession.session?.myPeerID.displayName)!,"score":self.score,"scoreboard":scoreBoard,"navigateToVictory":true] as [String : Any]
+            let strr = getJsonString(dict: jsonObject)
+            appDelegate.IPSession.sendMessage(message: strr)
+            winner = myPeerName
+            perform(#selector(navigateToVictory), with: nil, afterDelay: 3)
+        }
+            
+        else {
+            
+            let jsonObject  = ["message":"playOver","peer_name":(appDelegate.IPSession.session?.myPeerID.displayName)!,"score":self.score,"scoreboard":scoreBoard,"navigateToVictory":false] as [String : Any]
+            let strr = getJsonString(dict: jsonObject)
+            appDelegate.IPSession.sendMessage(message: strr)
+            perform(#selector(navigateToLeaderBoard), with: nil, afterDelay: 3)
+        }
+    }
+    
+    /*Navigate To Victory Page*/
+    func navigateToVictory(){
+    
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "VictoryAnimationViewController") as! VictoryAnimationViewController
+        _ = self.navigationController?.pushViewController(controller, animated: false)
+        controller.strWinner = winner
+    }
+    
+    
+    //MARK:- Navigation
+    func navigateToLeaderBoard() {
+    
+        let array = self.navigationController?.viewControllers
+        
+        for obj in array! {
+            print(obj)
+            if obj.isKind(of: LeaderBoardViewController.self)  {
+                
+                _ =  self.navigationController?.popToViewController(obj, animated: false)
+            }
+        }
+    }
+    
+    /*Show Result on Others Players UI*/
+    func popResultStatus(playerName:String,scores:NSInteger,victory:Bool) {
+        
+        lblTimer.isHidden = true
+        lblWord.isHidden = true
+        lblPlayer.isHidden = true
+        
+        let str : String = "CONGRATS \n \(playerName) YOU GOT \n \(scores) POINTS."
+        lblResult.text = str
+        setPopupAnimation(target: lblResult)
+        
+        if(victory){
+            
+            winner = playerName
+            perform(#selector(navigateToVictory), with: nil, afterDelay: 2.5)
+        }
+        else{
+            perform(#selector(navigateToLeaderBoard), with: nil, afterDelay: 2.5)
+        }
+    }
+    
+    /*Add Good Guess Sound*/
+    func goodGuessSound() {
+        
+        let url = Bundle.main.url(forResource: kGoodGuessBell, withExtension: kWav)!
+        
+        do {
+            goodGuessBell = try AVAudioPlayer(contentsOf: url)
+            guard let goodGuessBell = goodGuessBell else { return }
+            goodGuessBell.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+}

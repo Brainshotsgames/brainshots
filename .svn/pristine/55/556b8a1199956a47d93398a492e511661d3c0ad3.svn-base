@@ -1,0 +1,133 @@
+//
+//  SoundManager.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 07/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class SoundManager: NSObject {
+
+    static let sharedInstance : SoundManager = {
+        let instance = SoundManager()
+        return instance
+    }()
+    
+    var music: AVAudioPlayer?
+    var fx : AVAudioPlayer?
+    var voice: AVAudioPlayer?
+    
+    /*Play Music*/
+    func musicManager(soundName:String) {
+        
+        let url = Bundle.main.url(forResource: soundName, withExtension: "wav")!
+        
+        do {
+            music = try AVAudioPlayer(contentsOf: url)
+            guard let music = music else { return }
+            
+            music.prepareToPlay()
+            music.play()
+            music.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Set Music Volume*/
+    func setMusicVolume(value:Float){
+        
+        UserDefaults.standard.set(value, forKey: "musicVolume")
+        music?.setVolume(value, fadeDuration: 0)
+    }
+    
+    
+    func playMultipleSounds(sound1:String,sound2:String){
+    
+        var url = Bundle.main.url(forResource: sound1, withExtension: "wav")!
+        
+        var music2: AVAudioPlayer?
+        
+        do {
+            music = try AVAudioPlayer(contentsOf: url)
+            guard let music = music else { return }
+            
+            music.prepareToPlay()
+            music.play()
+            music.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            
+            url = Bundle.main.url(forResource: sound2, withExtension: "wav")!
+            do {
+                music2 = try AVAudioPlayer(contentsOf: url)
+                guard let music = music2 else { return }
+                
+                music.prepareToPlay()
+                music.play()
+                music.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+                
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    /*Play FX*/
+    func fxManager(soundName:String) {
+        
+        let url = Bundle.main.url(forResource: soundName, withExtension: "wav")!
+        
+        do {
+            music = try AVAudioPlayer(contentsOf: url)
+            guard let fx = fx else { return }
+            
+            fx.prepareToPlay()
+            fx.play()
+            fx.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Set Music Volume*/
+    func setFxVolume(value:Float){
+        
+        UserDefaults.standard.set(value, forKey: "fxVolume")
+        fx?.setVolume(value, fadeDuration: 0)
+    }
+
+    /*Play Voice*/
+    func voiceManager(soundName:String){
+        
+        let url = Bundle.main.url(forResource: soundName, withExtension: "wav")!
+        
+        do {
+            music = try AVAudioPlayer(contentsOf: url)
+            guard let voice = voice else { return }
+            
+            voice.prepareToPlay()
+            voice.play()
+            voice.setVolume(UserDefaults.standard.float(forKey: "voiceVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Set Music Volume*/
+    func setVoiceVolume(value:Float){
+        
+        UserDefaults.standard.set(value, forKey: "voiceVolume")
+        voice?.setVolume(value, fadeDuration: 0)
+    }
+}

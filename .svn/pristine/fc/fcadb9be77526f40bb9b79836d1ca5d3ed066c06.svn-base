@@ -1,0 +1,106 @@
+//
+//  LaunchViewController.swift
+//  Brainshots
+//
+//  Created by softprodigy on 28/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class LaunchViewController: UIViewController {
+
+    fileprivate var rootViewController: UIViewController? = nil
+    
+    @IBOutlet weak var imgPour: UIImageView!
+    var imgSingHit = FLAnimatedImageView()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        /*Sing sound instance*/
+        SoundManager.sharedInstance.playLaunchSound()
+        
+        perform(#selector(singHitAnimation), with: nil, afterDelay: 0.6)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK: - Animate Sing Hit
+    func singHitAnimation() {
+        
+        imgSingHit = FLAnimatedImageView(frame: self.view.frame)
+        self.view.addSubview(imgSingHit)
+       
+        var url = NSURL()
+        url = Bundle.main.url(forResource: kSingHit, withExtension: kGif)! as NSURL
+        
+        let data = NSData(contentsOf: url as URL)
+        let animatedImage = FLAnimatedImage(animatedGIFData: data as Data!)
+        animatedImage?.loopCount = 1
+        imgSingHit.animatedImage = animatedImage
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            
+            self.pourAnimation()
+        }
+    }
+    
+    // MARK: - Pour Animation
+    func pourAnimation() {
+        
+        imgPour.frame = loadingFrames()
+        
+        var images =  [UIImage]()
+        for i in 1...10 {
+            let imgName = String("Pour_\(i).png")
+            let img = UIImage(named:imgName!)
+            images.append(img!)
+        }
+        
+        imgPour.animationImages = images
+        imgPour.animationDuration = 0.8
+        imgPour.startAnimating()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            
+            self.imgPour.stopAnimating()
+            self.imgPour.image = UIImage.init(named:"Pour_10.png")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                
+                let storyboard : UIStoryboard = UIStoryboard.init(name: kHomeSB, bundle: nil)
+                let vc = storyboard.instantiateViewController(withIdentifier: kHomeVC) as! HomeViewController
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        }
+    }
+    
+    // Mark :- Set Loading Animation Frames
+    func loadingFrames() -> CGRect {
+        
+        var frames = CGRect()
+        
+        if (DeviceType.IS_IPHONE_5) {
+            
+            frames = CGRect(x: 180, y: 146, width: 90, height: 146)
+        }
+        else if (DeviceType.IS_IPHONE_6) {
+            
+            frames = CGRect(x: 216, y: 169, width: 97, height: 174)
+        }
+        else if (DeviceType.IS_IPHONE_6P) {
+            
+            frames = CGRect(x: 243, y: 186, width: 101, height: 193)
+        }
+        else if (DeviceType.IS_IPHONE_4_OR_LESS){
+            
+            frames = CGRect(x: 181, y: 122, width: 90, height: 124)
+        }
+        return frames
+    }
+}

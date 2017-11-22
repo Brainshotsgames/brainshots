@@ -1,0 +1,69 @@
+//
+//  HowToPlay1VC.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 24/01/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+let Individual_Play_Text = "After all players log in and “shots” are chosen, you are ready to play.  The game chooses the first player.  This player must sing a song using the random word on the screen in one or two lines.  If a player successfully sings a song with that word before the 10 seconds are up, that player swipes right for a point.  Play continues with the next player who uses the same word in a new song.  If the time runs out before a song is sung, the player is out of the round and must take their shot. The round is over when everyone has run out of new songs to sing. The last player to successfully sing a song is the winner of the round, gets an additional point and does not have to take a shot."
+
+class HowToPlay1VC: UIViewController {
+
+    @IBOutlet weak var backView: UIView!
+    @IBOutlet weak var lblText: UILabel!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        //set border for textlabel
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+        
+        //add attributed string
+        var attributedString = NSMutableAttributedString()
+        attributedString = NSMutableAttributedString(string: Individual_Play_Text)
+        
+        //set paragraph style
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 3 // Whatever line spacing you want in points
+        
+        //set font family
+        let font = UIFont(name:"FatFrank-Regular", size: setFontSize())
+        
+        // add attributes
+        attributedString.addAttribute(NSFontAttributeName, value: font! ,range:NSMakeRange(0, attributedString.length))
+        attributedString.addAttribute(NSParagraphStyleAttributeName, value:paragraphStyle, range:NSMakeRange(0, attributedString.length))
+        attributedString.addAttribute(NSForegroundColorAttributeName, value: UIColor.white , range: NSMakeRange(0, attributedString.length))
+        
+        // set label text
+        lblText.attributedText = attributedString;
+    }
+    
+    // Set Font Size
+    func setFontSize()-> CGFloat {
+    
+        var fontSize = CGFloat()
+        
+        if (DeviceType.IS_IPHONE_5) {
+            fontSize = 16.0
+        }
+        else if (DeviceType.IS_IPHONE_6) {
+            fontSize = 19.0
+        }
+        else if (DeviceType.IS_IPHONE_6P) {
+            fontSize = 22.0
+        }
+        else if (DeviceType.IS_IPHONE_4_OR_LESS){
+            fontSize = 14.0
+        }
+        return fontSize
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+}

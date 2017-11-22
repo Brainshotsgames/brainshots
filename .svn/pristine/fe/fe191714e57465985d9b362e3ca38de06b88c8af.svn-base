@@ -1,0 +1,227 @@
+//
+//  IntroLightningViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 10/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class IntroLightningViewController: UIViewController {
+    
+    var characterEnterancePlayer : AVAudioPlayer?
+    var LightningSoundPlayer : AVAudioPlayer?
+    var carsSkidToHaltPlayer :AVAudioPlayer?
+    var lightningSound :AVAudioPlayer?
+    
+    var player : AVPlayer?
+    
+     let showAnimationImgView = UIImageView()
+    var lastImage = UIImage()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+//        characterEntersSound()
+//        ligtningSound()
+//        carSkidSound()
+        
+        //lightningRoundSound()
+        //playVideo()
+        perform(#selector(playVideo), with: nil, afterDelay: 0.4)
+       
+        // Do any additional setup after loading the view.
+    }
+    
+    func playVideo() {
+        
+        let path = Bundle.main.path(forResource: "lightning", ofType:"mov")
+        player = AVPlayer(url: NSURL(fileURLWithPath: path!) as URL)
+        let layer = AVPlayerLayer()
+        layer.player = player
+        layer.frame = self.view.frame
+        layer.backgroundColor = UIColor.clear.cgColor
+        layer.videoGravity = AVLayerVideoGravityResizeAspectFill
+        self.view.layer.addSublayer(layer)
+        player?.play()
+        player?.volume = (UserDefaults.standard.float(forKey: "fxVolume"))
+        
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            self.showCurtainsOpen()
+            self.showAnimationImgView.animationImages = nil
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//            self.showAnimation()
+//        }
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    /*show Lightning Animation*/
+    func showAnimation() {
+        
+        var imgSinker = UIImage()
+        showAnimationImgView.frame = self.view.frame
+        self.view.addSubview(showAnimationImgView)
+        
+        var url = NSURL()
+        var data = Data()
+        url = Bundle.main.url(forResource: "Lightning Round_Small", withExtension: "gif")! as NSURL
+        
+        do {
+            data = try Data.init(contentsOf: url as URL)
+        } catch {
+            print(error)
+        }
+        
+        imgSinker = UIImage.animatedImage(withAnimatedGIFData:data)!
+        showAnimationImgView.animationImages = imgSinker.images
+        showAnimationImgView.animationDuration = imgSinker.duration
+        showAnimationImgView.animationRepeatCount = 1
+        lastImage = (imgSinker.images?.last)!
+        showAnimationImgView.image = lastImage
+        showAnimationImgView.startAnimating()
+        lightningSound?.prepareToPlay()
+        lightningSound?.play()
+        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0) {
+//        
+////            self.characterEnterancePlayer?.prepareToPlay()
+////            self.characterEnterancePlayer?.play()
+//           // self.lightningSound?.prepareToPlay()
+//           // self.lightningSound?.play()
+//        }
+//        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//            
+//           
+//        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + showAnimationImgView.animationDuration + 1.5) {
+            
+            self.showCurtainsOpen()
+            self.showAnimationImgView.animationImages = nil
+        }
+    }
+    
+    func animate(){
+        showAnimationImgView.startAnimating()
+    }
+    
+    /*Play Sounds*/
+    func playSound(){
+        
+        LightningSoundPlayer?.prepareToPlay()
+        LightningSoundPlayer?.play()
+        carsSkidToHaltPlayer?.prepareToPlay()
+        carsSkidToHaltPlayer?.play()
+    }
+    
+    /*Show OpenCurtains Animation*/
+    func showCurtainsOpen(){
+        
+        appDelegate.showCurtainsOpening()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        
+            self.navigateToLightningRound()
+            //self.showAnimationImgView.removeFromSuperview()
+        }
+    }
+    
+    /*Navigate To Lightning Round*/
+    func navigateToLightningRound(){
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "LightningViewController") as! LightningViewController
+        self.navigationController?.pushViewController(controller, animated: false)
+    }
+    
+    /*Play Characte Entrance Sound*/
+    func characterEnterance(){
+        
+        characterEnterancePlayer?.prepareToPlay()
+        characterEnterancePlayer?.play()
+    }
+    
+    /*Play Lightning Sound*/
+    func lightning(){
+        
+        LightningSoundPlayer?.prepareToPlay()
+        LightningSoundPlayer?.play()
+    }
+    
+    /*Play Car Skid Sound*/
+    func carSkid(){
+        
+        carsSkidToHaltPlayer?.prepareToPlay()
+        carsSkidToHaltPlayer?.play()
+    }
+    
+    /*Lightning Round Sound*/
+    func lightningRoundSound() {
+        
+        let url = Bundle.main.url(forResource: "LIGHTNING FX COMBINED", withExtension: "wav")!
+        
+        do {
+            lightningSound = try AVAudioPlayer(contentsOf: url)
+            guard let lightningSound = lightningSound else { return }
+            lightningSound.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Cars Skid Sound*/
+    func characterEntersSound() {
+        
+        let url = Bundle.main.url(forResource: "CHARACTER ZIP IN", withExtension: "wav")!
+        
+        do {
+            characterEnterancePlayer = try AVAudioPlayer(contentsOf: url)
+            guard let characterEnterancePlayer = characterEnterancePlayer else { return }
+            characterEnterancePlayer.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Munch Bite Sound*/
+    func ligtningSound(){
+        
+        let url = Bundle.main.url(forResource: "LIGHTNING & ELECTRIFY", withExtension: "wav")!
+        
+        do {
+            LightningSoundPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let LightningSoundPlayer = LightningSoundPlayer else { return }
+            LightningSoundPlayer.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Munch Bite Sound*/
+    func carSkidSound(){
+        
+        let url = Bundle.main.url(forResource: "2 CARS SKID TO A HALT", withExtension: "wav")!
+        
+        do {
+            carsSkidToHaltPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let carsSkidToHaltPlayer = carsSkidToHaltPlayer else { return }
+            carsSkidToHaltPlayer.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+}
+

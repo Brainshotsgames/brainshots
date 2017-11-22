@@ -1,0 +1,70 @@
+//
+//  HowToPlay3VC.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 24/01/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+let Team_Play_Content = "In 'team play', only one phone is used per team.  A set up screen will allow the leader to create a team nickname and the team must decide their \"shot\" together.  The leader will be in charge of swiping for answers during game play.  Only one player on the team can sing during a turn.  In lightning rounds, the team leader will select a rep from the team to play."
+
+class HowToPlay3VC: UIViewController {
+
+    @IBOutlet weak var backView: UIView!
+    @IBOutlet weak var lblText: UILabel!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+        
+        //add attributed string
+        var attributedString = NSMutableAttributedString()
+        attributedString = NSMutableAttributedString(string: Team_Play_Content)
+        
+        //set paragraph style
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 7 //Whatever line spacing you want in points
+        
+        //set font family
+        let font = UIFont(name:"FatFrank-Regular", size: setFontSize())
+        
+        // add attributes
+        attributedString.addAttribute(NSFontAttributeName, value: font! ,range:NSMakeRange(0, attributedString.length))
+        attributedString.addAttribute(NSParagraphStyleAttributeName, value:paragraphStyle, range:NSMakeRange(0, attributedString.length))
+        attributedString.addAttribute(NSForegroundColorAttributeName, value: UIColor.white , range: NSMakeRange(0, attributedString.length))
+        
+        // set label text
+        lblText.attributedText = attributedString;
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    // Set Font Size
+    func setFontSize()-> CGFloat {
+        
+        var fontSize = CGFloat()
+        
+        if (DeviceType.IS_IPHONE_5) {
+            fontSize = 16.0
+        }
+        else if (DeviceType.IS_IPHONE_6) {
+            fontSize = 19.0
+        }
+        else if (DeviceType.IS_IPHONE_6P) {
+            fontSize = 22.0
+        }
+        else if (DeviceType.IS_IPHONE_4_OR_LESS){
+            fontSize = 14.0
+        }
+        return fontSize
+    }
+}

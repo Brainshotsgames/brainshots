@@ -1,0 +1,139 @@
+//
+//  IntroLightningViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 10/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class IntroLightningViewController: UIViewController {
+    
+    var characterEnterancePlayer : AVAudioPlayer?
+    var LightningSoundPlayer : AVAudioPlayer?
+    var carsSkidToHaltPlayer :AVAudioPlayer?
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        characterEntersSound()
+        ligtningSound()
+        carSkidSound()
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1){
+            self.showAnimation()
+        }
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    func showAnimation() {
+        
+        let showAnimationImgView = UIImageView()
+        var imgSinker = UIImage()
+        showAnimationImgView.frame = self.view.frame
+        self.view.addSubview(showAnimationImgView)
+        
+        var url = NSURL()
+        var data = Data()
+        url = Bundle.main.url(forResource: "Lightning Round_Small", withExtension: "gif")! as NSURL
+        
+        do {
+            data = try Data.init(contentsOf: url as URL)
+        } catch {
+            print(error)
+        }
+        
+        imgSinker = UIImage.animatedImage(withAnimatedGIFData:data)!
+        showAnimationImgView.animationImages = imgSinker.images
+        showAnimationImgView.animationDuration = imgSinker.duration
+        showAnimationImgView.animationRepeatCount = 1
+        showAnimationImgView.image = imgSinker.images?.last
+        showAnimationImgView.startAnimating()
+        
+        perform(#selector(self.characterEnterance), with: nil, afterDelay: 0.1)
+        perform(#selector(self.lightning), with: nil, afterDelay: 0.2)
+        perform(#selector(self.carSkid), with: nil, afterDelay: 0.3)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + showAnimationImgView.animationDuration + 1.5) {
+                showAnimationImgView.removeFromSuperview()
+            let controller = self.storyboard?.instantiateViewController(withIdentifier: "LightningViewController") as! LightningViewController
+            self.navigationController?.pushViewController(controller, animated: false)
+        }
+    }
+    
+    /*Play Characte Entrance Sound*/
+    func characterEnterance(){
+        
+        characterEnterancePlayer?.prepareToPlay()
+        characterEnterancePlayer?.play()
+    }
+    
+    /*Play Lightning Sound*/
+    func lightning(){
+        
+        LightningSoundPlayer?.prepareToPlay()
+        LightningSoundPlayer?.play()
+    }
+    
+    /*Play Car Skid Sound*/
+    func carSkid(){
+        
+        carsSkidToHaltPlayer?.prepareToPlay()
+        carsSkidToHaltPlayer?.play()
+    }
+    
+    /*Add Cars Skid Sound*/
+    func characterEntersSound() {
+        
+        let url = Bundle.main.url(forResource: "CHARACTER ZIP IN", withExtension: "wav")!
+        
+        do {
+            characterEnterancePlayer = try AVAudioPlayer(contentsOf: url)
+            guard let characterEnterancePlayer = characterEnterancePlayer else { return }
+            characterEnterancePlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Munch Bite Sound*/
+    func ligtningSound(){
+        
+        let url = Bundle.main.url(forResource: "LIGHTNING & ELECTRIFY", withExtension: "wav")!
+        
+        do {
+            LightningSoundPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let LightningSoundPlayer = LightningSoundPlayer else { return }
+            LightningSoundPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Add Munch Bite Sound*/
+    func carSkidSound(){
+        
+        let url = Bundle.main.url(forResource: "2 CARS SKID TO A HALT", withExtension: "wav")!
+        
+        do {
+            carsSkidToHaltPlayer = try AVAudioPlayer(contentsOf: url)
+            guard let carsSkidToHaltPlayer = carsSkidToHaltPlayer else { return }
+            carsSkidToHaltPlayer.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+}

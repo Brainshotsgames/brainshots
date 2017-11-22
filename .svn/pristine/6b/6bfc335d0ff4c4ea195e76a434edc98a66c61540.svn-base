@@ -1,0 +1,36 @@
+//
+//  LegalDisclaimerViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class LegalDisclaimerViewController: UIViewController {
+
+    @IBOutlet weak var backView: UIView!
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func btnBack(_ sender: AnyObject) {
+    
+        _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func btnBackTouchDown(_ sender: Any) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+    
+}

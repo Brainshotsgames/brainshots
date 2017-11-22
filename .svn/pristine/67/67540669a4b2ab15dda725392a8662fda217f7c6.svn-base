@@ -1,0 +1,112 @@
+//
+//  OptionsViewController.swift
+//  Brainshots
+//
+//  Created by Anuradha Sharma on 18/11/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class OptionsViewController: UIViewController {
+    
+    //MARK:- Declare Properties
+    
+    @IBOutlet var btnHowToPlay: UIButton!
+    @IBOutlet var btnOptions: UIButton!
+    @IBOutlet var btnMoreGames: UIButton!
+    @IBOutlet var btnLegalDisclaimer: UIButton!
+    @IBOutlet var btnCredits: UIButton!
+    @IBOutlet var btnInAppPurchase: UIButton!
+    
+    //MARK:- View Did Load
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        hideButtons()
+        perform(#selector(showButtons), with: nil, afterDelay: 1.5)
+
+    }
+    
+    func hideButtons() {
+    
+        btnHowToPlay.isHidden = true
+        btnOptions.isHidden = true
+        btnMoreGames.isHidden = true
+        btnLegalDisclaimer.isHidden = true
+        btnCredits.isHidden = true
+        btnInAppPurchase.isHidden = true
+        
+    }
+    
+    func showButtons() {
+    
+        btnHowToPlay.isHidden = false
+        btnOptions.isHidden = false
+        btnMoreGames.isHidden = false
+        btnLegalDisclaimer.isHidden = false
+        btnCredits.isHidden = false
+        btnInAppPurchase.isHidden = false
+    
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- Button Actions
+    @IBAction func btnHowToPlay(_ sender: AnyObject) {
+        
+    }
+    
+    @IBAction func btnOptions(_ sender: AnyObject) {
+        
+    }
+    @IBAction func btnMoreGames(_ sender: AnyObject) {
+        
+    }
+
+    @IBAction func btnLegalDisclaimer(_ sender: AnyObject) {
+        
+    }
+    
+    @IBAction func btnCredits(_ sender: AnyObject) {
+        
+    }
+    
+    @IBAction func btnInAppPurchase(_ sender: AnyObject) {
+        
+    }
+    
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+        hideButtons()
+        perform(#selector(openCurtains), with: nil, afterDelay: 1)
+        
+    }
+    
+    func openCurtains(){
+    
+        self.appDelegate.openCurtains(isOpen:true)
+        perform(#selector(popToHome), with: nil, afterDelay: 1)
+    }
+    
+    func popToHome () {
+    
+        _ = self.navigationController?.popViewController(animated: false)
+    
+    }
+    
+    /*
+    // MARK: - Navigation
+
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destinationViewController.
+        // Pass the selected object to the new view controller.
+    }
+    */
+
+}

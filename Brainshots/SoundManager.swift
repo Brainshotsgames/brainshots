@@ -1,0 +1,411 @@
+//
+//  SoundManager.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 07/02/17.
+//  Copyright © 2017 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class SoundManager: NSObject {
+
+    static let sharedInstance : SoundManager = {
+        let instance = SoundManager()
+        return instance
+    }()
+    
+    /*Fx players for handling fx Effects*/
+    /*Using multiple sound effects so that it should be easy for handling multiple sounds at a time and smooth syncronization between sound effects*/
+    var fx_1 : AVAudioPlayer?
+    var fx_2 : AVAudioPlayer?
+    var fx_3 : AVAudioPlayer?
+    
+    /*LaunchGame fx Effect instance*/
+    /*It should be always high*/
+    var launchSound : AVAudioPlayer?
+    
+    /*music player to handle bacground music sync*/
+    var music : AVAudioPlayer?
+    
+    /*Victory Music*/
+    var victoryMusic : AVAudioPlayer?
+    
+    /*Good Guess Music*/
+    var guessMusic : AVAudioPlayer?
+    
+    /*Play Sing Sound*/
+    func playLaunchSound(){
+        
+        let url = Bundle.main.url(forResource: "BRAIN SHOTS LOGO MUSIC", withExtension: "wav")!
+        
+        do {
+            
+            launchSound = try AVAudioPlayer(contentsOf: url)
+            guard let launchSound = launchSound else { return }
+            
+            launchSound.prepareToPlay()
+            launchSound.play()
+            launchSound.setVolume(1,fadeDuration: 0) //launch player always set to high
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+
+    /*Set Fx Volume*/
+    func setFxVolume(value:Float){
+        
+        print(value)
+        UserDefaults.standard.set(value, forKey: "fxVolume")
+        fx_1?.setVolume(value, fadeDuration: 0)
+        fx_2?.setVolume(value, fadeDuration: 0)
+        fx_3?.setVolume(value, fadeDuration: 0)
+    }
+    
+    /*stop Fx*/
+    func stopFx() {
+        
+        fx_1?.stop()
+        fx_2?.stop()
+        fx_3?.stop()
+    }
+    
+    /*Play Background(Music) Sound*/
+    func playBackgroundSound() {
+        
+        let url = Bundle.main.url(forResource: "SHOT CHOICES", withExtension: "wav")!
+
+        do {
+            music = try AVAudioPlayer(contentsOf: url)
+            guard let music = music else { return }
+            
+            music.prepareToPlay()
+            music.play()
+            music.setVolume(UserDefaults.standard.float(forKey: "musicVolume"), fadeDuration: 0)
+            music.numberOfLoops = -1
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Stop Background(Music) Sound*/
+    func stopBackgroundSound(){
+        music?.stop()
+    }
+    
+    func pauseBackgroundSound(){
+        music?.pause()
+    }
+    func playBackground(){
+        music?.play()
+    }
+    
+    /*Set Background(Music) Volume*/
+    func setMusicVolume(value:Float){
+        
+        UserDefaults.standard.set(value, forKey: "musicVolume")
+        music?.setVolume(value, fadeDuration: 0)
+    }
+
+    /******************************Game Sounds****************************************/
+    
+    //MARK:- Calling switch methods
+    
+    /*Play button pressed sound*/
+    func playButtonPressedSound(){
+        
+        switchToSound(value: 0)
+    }
+    
+    /*Add HandSlap Sound*/
+    func playStepsInSound() {
+        
+        switchToSound(value: 1)
+    }
+    
+    /*Add Bottle On Counter Sound*/
+    func playBigSlurpSound(){
+        
+        switchToSound(value: 2)
+    }
+    
+    /*Add bigSlurp Sound*/
+    func playThinkerSound() {
+        
+        switchToSound(value: 3)
+    }
+    
+    /*Add StepsIn Sound*/
+    func playBottleOnCounterSound(){
+        
+//        switchToSound(value: 4)
+    }
+    
+    /*Add Fridge Door Open Sound*/
+    func playFridgeDoorOpenSound() {
+        
+        switchToSound(value: 5)
+    }
+    
+    /*Add Munch Bite Sound*/
+    func playMunchBiteSound(){
+        
+        switchToSound(value: 6)
+    }
+    
+    /*Add Munch Bite Sound*/
+    func playPizzaGrabSound(){
+        
+        switchToSound(value: 7)
+    }
+    
+    /*Munch Bite Sound*/
+    func playShotChoiceEndSound(){
+        
+        switchToSound(value: 8)
+    }
+    /*Good Guess Sound*/
+    func playGoodGuessSound() {
+        
+        switchToSound(value: 9)
+    }
+    
+    /*Missed Guess Sound*/
+    func playMissedGuessSound() {
+        
+        switchToSound(value: 10)
+    }
+    
+    /*Last 3 Sec Count*/
+    func playLastCountSound() {
+        
+        switchToSound(value: 11)
+    }
+    
+    /*Count Music*/
+    func playCountSound(){
+    
+        switchToSound(value: 12)
+    }
+    
+    func playVictorySound(){
+    
+        switchToSound(value: 13)
+    }
+    
+    func playVictoryEndSound(){
+    
+        switchToSound(value: 14)
+    }
+    
+    func playShotGunSound(){
+        
+        switchToSound(value: 15)
+    }
+    
+    func playGrownFlip(){
+    
+        switchToSound(value: 16)
+    }
+    
+    func playFlipBack() {
+    
+        switchToSound(value: 17)
+    }
+    
+    //MARK: Switch to sound
+    func switchToSound(value:NSInteger){
+        
+        switch value {
+        case 0:
+            play(string: "BUTTON PRESS CLICK", player: fx_1)
+            break
+        case 1:
+            play(string: "CHARACTER STEPS IN", player: fx_1)
+            break
+        case 2:
+            play(string: "BIG SLURP", player: fx_2)
+            break
+        case 3:
+            play(string: "Thinker Sound FX", player: fx_1)
+            break
+        case 4:
+           // play(string: "", player: fx_2)
+            break
+        case 5:
+            play(string: "FRIDGE DOOR OPEN", player: fx_1)
+            break
+        case 6:
+            play(string: "MUNCH BITE", player: fx_2)
+            break
+        case 7:
+            play(string: "PIZZA GRAB SLICE", player: fx_3)
+            break
+        case 8:
+            play(string: "SHOT CHOICE END", player: fx_1)
+            break
+        case 9:
+            play(string: "BELL FOR GOOD GUESS", player: fx_1)
+            break
+        case 10:
+            play(string: "BUZZER FOR MISSED GUESS", player: fx_1)
+            break
+        case 11:
+            play(string: "3 SEC TIME RUN OUT", player: fx_1)
+            break
+        case 12:
+            play(string: "Count", player: fx_1)
+            break
+        case 13:
+            play(string: "VICTORY MUSIC", player: victoryMusic)
+            break
+        case 14:
+            play(string: "VICTORY MUSIC END", player: fx_2)
+            break
+        case 15:
+            play(string: "SHOTGUN BUTTON", player: fx_2)
+            break
+        case 16:
+            play(string: "Grow & Turn", player: fx_1)
+            break
+        case 17:
+            play(string: "Flip Back", player: fx_2)
+            break
+        default:
+            break
+        }
+    }
+    
+    //MARK:- Play Method
+    func play(string:String,player:AVAudioPlayer?) {
+    
+        let url = Bundle.main.url(forResource: string, withExtension: "wav")!
+    
+        if(player == fx_1){
+        
+            do {
+                fx_1 = try AVAudioPlayer(contentsOf: url)
+                guard let fx_1 = fx_1 else { return }
+                fx_1.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+                fx_1.prepareToPlay()
+                fx_1.play()
+                
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        
+        }
+        else if(player == fx_2){
+        
+            do {
+                fx_2 = try AVAudioPlayer(contentsOf: url)
+                guard let fx_2 = fx_2 else { return }
+                fx_2.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+                fx_2.prepareToPlay()
+                fx_2.play()
+                
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        
+        }
+        else if(player == fx_3){
+        
+            do {
+                fx_3 = try AVAudioPlayer(contentsOf: url)
+                guard let fx_3 = fx_3 else { return }
+                fx_3.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+                fx_3.prepareToPlay()
+                fx_3.play()
+                
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+        
+        else if (player == victoryMusic){
+        
+            do {
+                victoryMusic = try AVAudioPlayer(contentsOf: url)
+                victoryMusic?.setVolume(UserDefaults.standard.float(forKey: "fxVolume"), fadeDuration: 0)
+                victoryMusic?.prepareToPlay()
+                victoryMusic?.play()
+                victoryMusic?.numberOfLoops = -1
+                
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    /*Stops Victory Music*/
+    func stopVictoryMusic(){
+    
+        victoryMusic?.pause()
+        victoryMusic?.stop()
+    }
+    
+    /*Play Good Guess Sound*/
+    func playGoodGuess(){
+        
+        let url = Bundle.main.url(forResource: "BELL FOR GOOD GUESS", withExtension: "wav")!
+        
+        do {
+            
+            guessMusic = try AVAudioPlayer(contentsOf: url)
+            guard let goodGuessMusic = guessMusic else { return }
+            
+            goodGuessMusic.prepareToPlay()
+            goodGuessMusic.play()
+            goodGuessMusic.setVolume(1,fadeDuration: 0) //launch player always set to high
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    /*Play Miss Guess Sound*/
+    func playMissGuess(){
+        
+        let url = Bundle.main.url(forResource: "BUZZER FOR MISSED GUESS", withExtension: "wav")!
+        
+        do {
+            
+            guessMusic = try AVAudioPlayer(contentsOf: url)
+            guard let missGuessMusic = guessMusic else { return }
+            
+            missGuessMusic.prepareToPlay()
+            missGuessMusic.play()
+            missGuessMusic.setVolume(1,fadeDuration: 0) //launch player always set to high
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func playLast3SecCountDown(){
+    
+        let url = Bundle.main.url(forResource: "3 SEC TIME RUN OUT", withExtension: "wav")!
+        
+        do {
+            
+            guessMusic = try AVAudioPlayer(contentsOf: url)
+            guard let CountDown = guessMusic else { return }
+            
+            CountDown.prepareToPlay()
+            CountDown.play()
+            CountDown.setVolume(UserDefaults.standard.float(forKey: "fxVolume"),fadeDuration: 0)
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func stopCountDown(){
+    
+         guessMusic?.stop()
+    }
+}

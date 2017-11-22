@@ -1,0 +1,59 @@
+//
+//  LeaderBoardViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 02/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class LeaderBoardViewController: UIViewController,UITableViewDataSource,UITableViewDelegate {
+
+    @IBOutlet weak var tableView: UITableView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        
+        tableView.separatorColor = UIColor.clear
+        
+        // Do any additional setup after loading the view.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+ 
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return 5;
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "Cell"
+        
+        let cell : LeaderBoardCell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! LeaderBoardCell
+        
+        if(!((indexPath.row % 2) == 0)) {
+        
+            cell.backgroundColor = UIColor.lightGray
+        }
+        else{
+        
+            cell.backgroundColor = UIColor.init(red: 235.0/255.0, green: 235.0/255.0, blue: 235.0/255.0, alpha: 1)
+        }
+        
+        cell.lblPlayer.text = "Player 1"
+        cell.lblScore.text = "1"
+        
+        return cell
+    }
+    
+    @IBAction func btnContinue(_ sender: AnyObject) {
+  
+    }
+}

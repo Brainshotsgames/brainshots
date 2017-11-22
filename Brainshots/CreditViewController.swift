@@ -1,0 +1,84 @@
+//
+//  CreditViewController.swift
+//  Brainshots
+//
+//  Created by Amritpal Singh on 01/12/16.
+//  Copyright © 2016 Anuradha Sharma. All rights reserved.
+//
+
+import UIKit
+
+class CreditViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+
+    @IBOutlet weak var backView: UIView!
+    @IBOutlet weak var tableView: UITableView!
+    
+    var titleArray = [String]()
+    var detailArray = [String]()
+    
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+
+        CommonFunctions.sharedInstance.setupButtonBorder(vw: backView)
+        tableView.separatorColor = UIColor.clear
+        
+        /*Set Titles & Details */
+        titleArray = ["Concept & Creative Design","Music and Sound FX Design","Business Development","Animator","Graphic Designer","Project Coordinator","Customer Relationship Manager","Account Manager","Developer","Character Design","Sound FX Provider"]
+        
+        detailArray = ["Cheryl & Paul Koffman","Paul Koffman","Jeff Garshon","Dustin Hitchcock","Ginny Milling","Tiffany Ravensbergen","Ujjwal Anand","Ramesh Chand","Amritpal Singh","Rachel Matile","Scott McCrorie"]
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK:- TableView Delegates & Datasource
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        print(titleArray.count)
+        return titleArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cellId = "cellId"
+        let cell : CreditsCell = tableView.dequeueReusableCell(withIdentifier: cellId) as! CreditsCell
+        cell.lblTitle.text = titleArray[indexPath.row]
+        cell.lblDetail.text = detailArray[indexPath.row]
+        cell.selectionStyle = UITableViewCellSelectionStyle.none
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        var rowHeight = CGFloat()
+        
+        if (DeviceType.IS_IPHONE_5) {
+            rowHeight = 48.0
+        }
+        else if (DeviceType.IS_IPHONE_6) {
+            rowHeight = 60.0
+        }
+        else if (DeviceType.IS_IPHONE_6P) {
+            rowHeight = 67.0
+        }
+        else if (DeviceType.IS_IPHONE_4_OR_LESS){
+            rowHeight = 46.0
+        }
+        return rowHeight
+    }
+    
+    //MARK:- Actions
+    @IBAction func btnBack(_ sender: AnyObject) {
+        
+           _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    //TouchDown Actions
+    @IBAction func btnBackTouchDown(_ sender: Any) {
+        SoundManager.sharedInstance.playButtonPressedSound()
+    }
+
+}
